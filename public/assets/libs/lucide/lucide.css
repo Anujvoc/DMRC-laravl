@@ -1,0 +1,22 @@
+/* Lucide Icons CSS - Modern Icon Library */
+.lucide {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+/* Common Lucide icons */
+.lucide-menu::before { content: "☰"; }
+.lucide-x::before { content: "✕"; }
+.lucide-search::before { content: "🔍"; }
+.lucide-bell::before { content: "🔔"; }
+.lucide-settings::before { content: "⚙️"; }
+.lucide-user::before { content: "👤"; }
+.lucide-home::before { content: "🏠"; }
+.lucide-file::before { content: "📄"; }
+.lucide-calendar::before { content: "📅"; }

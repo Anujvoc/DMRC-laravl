@@ -1,0 +1,39 @@
+/* Flaticon CSS - Basic Icon Styles */
+.fi {
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+}
+
+/* Common icon sizes */
+.fi-rr { font-weight: 400; }
+.fi-sr { font-weight: 600; }
+.fi-br { font-weight: 700; }
+
+/* Icon scaling utilities */
+.scale-1x { font-size: 1em; }
+.scale-2x { font-size: 1.25em; }
+.scale-3x { font-size: 1.5em; }
+
+/* Common icons used in the dashboard */
+.fi-rr-apps::before { content: "📊"; }
+.fi-rr-search::before { content: "🔍"; }
+.fi-rr-brightness::before { content: "☀️"; }
+.fi-rr-moon::before { content: "🌙"; }
+.fi-rr-envelope::before { content: "✉️"; }
+.fi-rr-bell::before { content: "🔔"; }
+.fi-rr-calendar::before { content: "📅"; }
+.fi-rr-plus::before { content: "➕"; }
+.fi-rr-user-plus::before { content: "👤➕"; }
+.fi-rr-user-add::before { content: "👥"; }
+.fi-rr-book::before { content: "📚"; }
+.fi-rr-chart-pie-alt::before { content: "📈"; }
+.fi-rr-settings::before { content: "⚙️"; }
+.fi-rr-exit::before { content: "🚪"; }
+.fi-sr-users::before { content: "👥"; }
+.fi-sr-user-add::before { content: "👤➕"; }
+.fi-sr-graduation-cap::before { content: "🎓"; }
+.fi-sr-book::before { content: "📖"; }
+.fi-rr-arrow-small-up::before { content: "↑"; }
