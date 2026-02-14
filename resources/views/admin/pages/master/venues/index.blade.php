@@ -1,194 +1,201 @@
 @extends('admin.partials.app')
 
-@section('title', 'Venues')
+@section('title','Venues')
 
 @section('content')
-<style>
-    th{
-          font-size: 14px;
-    font-weight: 800;
-    color: gray;
-    }
 
-      
-</style>
+<div class="container mt-5 ml-5 " id="venueContainer">
 
-<div class="app-wrapper">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Venues Management</h2>
+    <div id="venuesHeader">
+        @if(session('success'))
+        <small class="text-success">{{session('success')}}</small>
+        @endif
+        @if(session('error'))
+        <small class="text-danger">{{session('error')}}</small>
+        @endif
+        <h1>Venues Management</h1>
+    </div>
+    <button type="button" class="btn btn-primary text-light fs-2 p-1" data-bs-toggle="modal"
+        data-bs-target="#addVenuesModal"><i class="bi bi-plus-lg fs-2 fw-bold p-1"></i> Add Veneus </button>
+    <div class="table row" id="venueTable">
 
-    <button type="button" class="btn btn-primary" onclick="openVenueModal()">
-        <i class="bi bi-plus"></i> Add New Venue
-    </button>
-</div>
+        <table class="table table table-striped  " id="venueTables">
+            <thead>
 
-    
+                <h3 class="text-light bg-primary px-2">Venue List</h3>
 
-    <!-- Statistics Cards -->
+                <tr>
 
+                    <th>Venues Name</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>Action</th>
 
-    <!-- Venues Table -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-body">
-            <!-- Table View -->
-            <div id="tableView">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle" id="venuesTable">
-                        <thead>
-                            <tr>
-                               
-                                <th>Venue Name</th>
-                                <th>Address</th>
-                                <th>Status</th>
-                                <th class="text-end">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($venue as $item)
-                            <tr>
-                                <td>{{$item->venue_name}}</td>
-                                <td>{{$item->address}}</td>
-                                <td>@if($item->is_active === 1)
-                                    <span class="badge bg-success">Active</span>
-                                    @else
-                                    <span class="badge bg-danger">Inactive</span>
-                                    @endif
-                                </td>
-                                <td class="text-end">
-                                    <button type="button" class="btn btn-sm btn-outline-primary editVenueBtn"
-                                        data-bs-toggle="modal" data-bs-target="#editVenuesModal" data-id="{{$item->venue_id}}"
-                                        data-name="{{$item->venue_name}}" data-address="{{$item->address}}">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <a href="{{ route('admin.master.venues.destroy', $item->venue_id) }}" 
-                                        class="btn btn-sm btn-outline-danger delete-item">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($venue as $item)
+                <tr>
+                    <td>{{$item->venue_name}}</td>
+                    <td>{{$item->address}}</td>
+                    <td class="pr-5 mr-5">@if($item->is_active === 1)
+
+                        <a href="{{url('admin/master/venues/toggle/'.$item->venue_id)}}"
+                            class="btn btn-success  btn-sm px-2 py-1 mr-5">Active</a>
+                        @else
+                        <a href="{{url('admin/master/venues/toggle/'.$item->venue_id)}}"
+                            class="btn  btn-danger btn-sm px-2 py-1 le">Inactive</a>
+
+                        @endif
+                    </td>
+                    <td class=" d-flex ml-5"><button type="button" class="btn btn btn ml-2 m-0 p-0  editVenuesModal"
+                            data-bs-toggle="modal" data-bs-target="#editVenuesModal" data-id="{{$item->venue_id}}"
+                            data-name="{{$item->venue_name}}" data-address="{{$item->address}}"> <i
+                                class="bi bi-pencil-square bg-dark text-light"></i></button>
+                        <form action="{{ url('admin/master/venues/'. $item->venue_id) }}" method="POST"
+                            style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+
+                            <button type="submit" class="btn m-0 p-0 border-0 bg-transparent">
+                                <i class="bi bi-trash bg-danger text-light p-1"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
 </div>
 
-<!-- Add/Edit Venue Modal -->
-<div class="modal fade" id="venueModal" tabindex="-1" aria-labelledby="venueModalLabel">
+<!-- Add venues modal is hare-->
+<div class="modal fade" id="addVenuesModal" tabindex="-1" aria-hidde="true" aria-labelledby="addVenueModalLabel">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="venueModalTitle">Add Venue</h5>
+                <h5 class="modal-title">Add Venues</h5>
+                @if(session('success'))
+                <small class="text-success">{{session('success')}}</small>
+                @endif
                 @if($errors->any())
-                <div class="alert alert-danger">
-                    @foreach($errors->all() as $error)
-                        <div>{{$error}}</div>
+                <div class="alert alert-danger">@foreach($errors->all() as $error)
+                    <div>{{$error}}</div>
                     @endforeach
                 </div>
                 @endif
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+
             </div>
-            <div class="modal-body">
-                <form id="venueForm" method="post">
+            <div class="modal-body ">
+
+                <form class="mt-5" action="{{url('admin/master/venues/add')}}" method="post">
                     @csrf
-                    <input type="hidden" name="id" id="venue_id">
-                    
-                    <div class="mb-3">
-                        <label for="venue_name" class="form-label">Venue Name</label>
-                        <input type="text" name="venue_name" id="venue_name" class="form-control" 
-                               placeholder="Enter Venue Name" required>
+                    <div class="mt-5">
+                        <label for="venue-name">Venue Name</label>
+                        <input type="text" name="venue_name" placeholder="Enter Venue Name" class="form-control">
                         @error('venue_name')
-                            <div class="text-danger small">{{$message}}</div>
+                        <small class="text-danger">{{$message}}</small>
                         @enderror
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="address" class="form-label">Address</label>
-                        <textarea name="address" id="address" class="form-control" 
-                                  placeholder="Enter Venue Address" rows="3" required></textarea>
+                    <div class="mt-5">
+                        <label for="address">Address</label>
+                        <input type="text" name="address" placeholder="Enter Venue Name" class="form-control">
                         @error('address')
-                            <div class="text-danger small">{{$message}}</div>
+                        <small class="text-danger">{{$message}}</small>
                         @enderror
                     </div>
 
-                    <div class="mb-3">
-                        <label for="is_active" class="form-label">Status</label>
-                        <select name="is_active" id="is_active" class="form-select">
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
-                        </select>
+                    <div class="mt-5">
+                        <button type="submit" class="btn btn-primary" type="button">submit</button>
+
                     </div>
 
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="bi bi-check-lg"></i> Add Venue
-                        </button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="bi bi-x-lg"></i> Cancel
-                        </button>
-                    </div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"> Close</button>
             </div>
         </div>
     </div>
 </div>
 
+<!--Updata modal-->
+<div class="modal fade" id="editVenuesModal" tabindex="-1" aria-hidde="true" aria-labelledby="editVenueModalLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Venues</h5>
+
+                @if($errors->any())
+                <div class="alert alert-danger">@foreach($errors->all() as $error)
+                    <div>{{$error}}</div>
+                    @endforeach
+                </div>
+                @endif
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+            <div class="modal-body ">
+
+                <form class="mt-5" action="{{url('admin/master/venues/update')}}" method="post">
+                    @csrf
+
+                    <input type="hidden" name="id" id="edit_id">
+                    <div class="mt-5">
+                        <label for="venue-name">Venue Name</label>
+                        <input type="text" name="venue_name" id="edit_name" placeholder="Enter Venue Name"
+                            class="form-control">
+                        @error('venue_name')
+                        <small class="text-danger">{{$message}}</small>
+                        @enderror
+                    </div>
+                    <div class="mt-5">
+                        <label for="address">Address</label>
+                        <input type="text" name="address" id="edit_address" placeholder="Enter Venue Name"
+                            class="form-control">
+                        @error('address')
+                        <small class="text-danger">{{$message}}</small>
+                        @enderror
+                    </div>
+
+                    <div class="mt-5">
+                        <button type="submit" class="btn btn-primary" type="button">submit</button>
+
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"> Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if($errors->any() || session('error'))
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Handle edit button clicks
-    document.querySelectorAll(".editVenueBtn").forEach(btn => {
+    let myAddVenueModal = new bootstrap.Modal(document.getElementById('addVenuesModal'));
+    myAddVenueModal.show();
+
+    let myEditVenueModal = new bootstrap.Modal(document.getElementById('editVenuesModal'));
+    myEditVenueModal.show();
+});
+</script>
+
+@endif
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll(".editVenuesModal").forEach(btn => {
         btn.addEventListener("click", function() {
-            const id = this.dataset.id;
-            const name = this.dataset.name;
-            const address = this.dataset.address;
-            
-            // Populate form fields
-            document.getElementById("venue_id").value = id;
-            document.getElementById("venue_name").value = name;
-            document.getElementById("address").value = address;
-            
-            // Change modal title and button text
-            document.getElementById("venueModalTitle").textContent = "Edit Venue";
-            document.getElementById("submitBtn").innerHTML = '<i class="bi bi-check-lg"></i> Update Venue';
-            
-            // Set form action to update route
-            document.getElementById("venueForm").action = "{{ route('admin.master.venues.update') }}";
-            
-            // Show modal
-            const venueModal = new bootstrap.Modal(document.getElementById('venueModal'));
-            venueModal.show();
+            document.getElementById("edit_id").value = this.dataset.id;
+            document.getElementById("edit_name").value = this.dataset.name;
+            document.getElementById("edit_address").value = this.dataset.address;
         });
     });
-});
 
-function openVenueModal() {
-    // Reset form for adding new venue
-    document.getElementById("venueForm").reset();
-    document.getElementById("venue_id").value = "";
-    document.getElementById("venueModalTitle").textContent = "Add Venue";
-    document.getElementById("submitBtn").innerHTML = '<i class="bi bi-check-lg"></i> Add Venue';
-    
-    // Set form action to add route
-    document.getElementById("venueForm").action = "{{ route('admin.master.venues.add') }}";
-    
-    // Show modal
-    const venueModal = new bootstrap.Modal(document.getElementById('venueModal'));
-    venueModal.show();
-}
-
-// Handle delete confirmation
-document.querySelectorAll(".delete-item").forEach(btn => {
-    btn.addEventListener("click", function(e) {
-        if(confirm('Are you sure you want to delete this venue?')) {
-            // Allow the delete to proceed
-            return true;
-        } else {
-            e.preventDefault();
-            return false;
-        }
-    });
 });
 </script>
 @endsection

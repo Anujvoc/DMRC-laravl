@@ -135,7 +135,7 @@
                 <i class="arrow"></i>
             </a>
             <ul class="submenu">
-                <li><a href="#">Manage Timetable</a></li>
+                <li><a href="{{url('admin/timetable-management/calender/batch')}}">Manage Timetable</a></li>
                 <li><a href="#">Add Timetable Entry</a></li>
                 <li><a href="#">Teacher Replacement</a></li>
                 <li><a href="#">Daily Report</a></li>

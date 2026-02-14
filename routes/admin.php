@@ -79,6 +79,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('venues/add',[VenueController::class, 'addVenue'])->name('venues.add');
         Route::post('venues/update',[VenueController::class, 'updateVenue'])->name('venues.update');
         Route::delete('venues/{id}',[VenueController::class, 'destroy'])->name('venues.destroy');
+         Route::get('venues/toggle/{id}',[VenueController::class, 'venueToggle'])->name('venues.toggle');
 
         
 
@@ -152,6 +153,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                Route::get('calender/batch',[TimeTableController::class, 'addNewBatch'])->name('calender.batch');
                Route::post('batch/store',[TimeTableController::class, 'storeBatch'])->name('batch.store');
                Route::get('weekly/training',[TimeTableController::class,'weeklyTraining'])->name('weekly.training');
+              
     });
 
 
