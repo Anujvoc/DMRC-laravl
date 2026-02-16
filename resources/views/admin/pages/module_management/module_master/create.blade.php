@@ -23,7 +23,7 @@
         
 
         <div class="card-body">
-            <form method="post" action="{{ route('admin.module.master.store') }}">
+            <form method="post" action="{{ route('admin.module.master.store') }}" onsubmit="debugFormSubmit(event)">
                 @csrf
                 <input type="hidden" name="topic_id" id="primary_topic_id" value="0">
                 <input type="hidden" name="subtopic_id" id="primary_subtopic_id" value="0">
@@ -222,23 +222,27 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Store topics data globally for dynamic rows
+const topicsData = @json($topics ?? []);
+
 // Add new topic row
 function addTopicRow() {
     const container = document.getElementById('topicsContainer');
     const newRow = document.createElement('div');
     newRow.className = 'topic-row mb-3 p-3 border rounded';
+    
+    // Generate topic options from stored data
+    let topicOptions = '<option value="">Select Topic</option>';
+    topicsData.forEach(topic => {
+        topicOptions += `<option value="${topic.topic_id}">${topic.topic}</option>`;
+    });
+    
     newRow.innerHTML = `
         <div class="row">
             <div class="col-md-6">
                 <label class="form-label">Topic</label>
                 <select class="form-control topic-select" name="topics[]" onchange="loadSubtopics(this)">
-                    <option value="">Select Topic</option>
-                    <?php
-                    $topics = DB::table('topics')->get();
-                    foreach($topics as $topic) {
-                        echo '<option value="' . $topic->topic_id . '">' . $topic->topic . '</option>';
-                    }
-                    ?>
+                    ${topicOptions}
                 </select>
             </div>
             <div class="col-md-6">
@@ -273,6 +277,8 @@ function loadSubtopics(selectElement) {
     const topicId = selectElement.value;
     const subtopicSelect = selectElement.closest('.topic-row').querySelector('.subtopic-select');
     
+    console.log('Loading subtopics for topic:', topicId); // Debug log
+    
     // Update primary topic_id if this is the first row
     const isFirstRow = selectElement.closest('.topic-row').parentElement.firstElementChild === selectElement.closest('.topic-row');
     if (isFirstRow) {
@@ -286,12 +292,14 @@ function loadSubtopics(selectElement) {
         // Fetch subtopics via AJAX
         fetch(`/admin/module/api/subtopics/${topicId}`)
             .then(response => {
+                console.log('Response status:', response.status); // Debug log
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 return response.json();
             })
             .then(data => {
+                console.log('Subtopics data received:', data); // Debug log
                 subtopicSelect.innerHTML = '<option value="">Select Subtopic</option>';
                 if (data && data.length > 0) {
                     data.forEach(subtopic => {
@@ -319,5 +327,42 @@ document.addEventListener('change', function(e) {
         }
     }
 });
+
+// Debug function to check form data before submission
+function debugFormSubmit(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const topics = formData.getAll('topics[]');
+    const subtopics = formData.getAll('subtopics[]');
+    
+    console.log('=== FORM DEBUG INFO ===');
+    console.log('All form data:');
+    for (let [key, value] of formData.entries()) {
+        console.log(key + ':', value);
+    }
+    
+    console.log('Topics array:', topics);
+    console.log('Subtopics array:', subtopics);
+    console.log('Topics length:', topics.length);
+    console.log('Subtopics length:', subtopics.length);
+    
+    // Check if topics are empty
+    const emptyTopics = topics.filter(topic => topic === '');
+    console.log('Empty topics:', emptyTopics.length);
+    
+    // Check if subtopics are empty
+    const emptySubtopics = subtopics.filter(subtopic => subtopic === '');
+    console.log('Empty subtopics:', emptySubtopics.length);
+    
+    // Show alert with debug info
+    alert(`Debug Info:
+Topics: ${topics.length} items (${emptyTopics.length} empty)
+Subtopics: ${subtopics.length} items (${emptySubtopics.length} empty)
+Check browser console for details`);
+    
+    // Submit the form after debug
+    event.target.submit();
+}
 </script>
 @endsection

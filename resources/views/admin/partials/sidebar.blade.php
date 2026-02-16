@@ -166,8 +166,8 @@
                <li><a href="{{ route('admin.module.topics') }}">Topics</a></li>
                 <li><a href="{{ route('admin.module.subtopics') }}">Sub Topics</a></li>
                 <li><a href="{{ route('admin.module.master') }}">Module Master</a></li>
-                <li><a href="#">Add Module</a></li>
-                <li><a href="#">All Modules</a></li>
+                <li><a href="{{ route('admin.module.master.store') }}">Add Module</a></li>
+                <li><a href="{{ route('admin.module.master') }}">All Modules</a></li>
                 <li><a href="#">Manage Categories</a></li>
             </ul>
         </li>

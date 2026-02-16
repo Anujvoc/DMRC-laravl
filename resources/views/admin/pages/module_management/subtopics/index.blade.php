@@ -21,7 +21,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="mb-0">Subtopics Management</h2>
 
-        <a href="{{ route('admin.master.subtopics.create') }}" class="btn btn-primary">
+        <a href="{{ route('admin.module.subtopics.create') }}" class="btn btn-primary">
             <i class="bi bi-plus"></i> Add New Subtopic
         </a>
     </div>
@@ -66,7 +66,7 @@
                                     </td>
                                     <td class="text-end">
                                         <div class="d-flex gap-1 justify-content-end">
-                                            <a href="{{ route('admin.master.subtopics.edit', $subtopic->subtopic_id) }}" class="btn btn-sm btn-outline-secondary btn-icon" title="Edit">
+                                            <a href="{{ route('admin.module.subtopics.edit', $subtopic->subtopic_id) }}" class="btn btn-sm btn-outline-secondary btn-icon" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <button class="btn btn-sm btn-danger btn-icon" title="Delete" onclick="deleteSubtopic({{ $subtopic->subtopic_id }})">
@@ -122,7 +122,7 @@ function deleteSubtopic(subtopicId) {
         // Create form for DELETE method
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '{{ route("admin.master.subtopics.destroy", ":id") }}'.replace(':id', subtopicId);
+        form.action = '{{ route("admin.module.subtopics.destroy", ":id") }}'.replace(':id', subtopicId);
         
         // Add CSRF token
         const csrfToken = document.createElement('input');

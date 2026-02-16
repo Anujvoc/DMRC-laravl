@@ -30,7 +30,7 @@
         <div class="col-lg-8">
             <div class="card border shadow-sm">
                 <div class="card-body p-4">
-                    <form method="POST" action="{{ route('admin.master.subtopics.store') }}">
+                    <form method="POST" action="{{ route('admin.module.subtopics.store') }}">
                         @csrf
                         <div class="row g-4">
                             <!-- Subtopic Information -->
@@ -79,7 +79,7 @@
                             <!-- Form Actions -->
                             <div class="col-12">
                                 <div class="d-flex gap-2 justify-content-end mt-4">
-                                    <a href="{{ route('admin.master.subtopics') }}" class="btn btn-outline-secondary">
+                                    <a href="{{ route('admin.module.subtopics') }}" class="btn btn-outline-secondary">
                                         <i class="fi fi-rr-cross me-1"></i> Cancel
                                     </a>
                                     <button type="submit" class="btn btn-primary">

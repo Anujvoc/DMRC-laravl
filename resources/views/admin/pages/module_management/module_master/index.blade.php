@@ -116,9 +116,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">Module Master</h2>
         <div class="d-flex gap-2">
-            <button class="btn btn-success" onclick="showDependencyFlow()">
-                <i class="bi bi-diagram-3"></i> Dependency Flow
-            </button>
+            
             <a href="{{ route('admin.module.master.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus"></i> Add Module
             </a>
@@ -154,6 +152,7 @@
                                 <a href="{{ route('admin.module.master.edit', $module->module_id) }}" class="btn btn-sm btn-outline-secondary btn-icon" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
+
                                 <button class="btn btn-sm btn-danger btn-icon" title="Delete" onclick="deleteModule({{$module->module_id}})">
                                     <i class="fas fa-trash"></i>
                                 </button>
@@ -366,13 +365,13 @@ function deleteModule(moduleId) {
         // Create form for DELETE method
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '/admin/modules/' + moduleId;
+        form.action = '/admin/module/module-master/' + moduleId;
         
         // Add CSRF token
         const csrfToken = document.createElement('input');
         csrfToken.type = 'hidden';
         csrfToken.name = '_token';
-        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        csrfToken.value = '{{ csrf_token() }}';
         form.appendChild(csrfToken);
         
         // Add DELETE method override

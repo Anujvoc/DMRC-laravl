@@ -30,7 +30,7 @@ use App\Http\Controllers\Admin\TimeTableController;
 Route::prefix('admin')->name('admin.')->group(function () {
     
     // Dashboard
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     
     // Master Management
     Route::prefix('master')->name('master.')->group(function () {
@@ -104,10 +104,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Module Master
         Route::get('/module-master', [ModuleController::class, 'index'])->name('master');
         Route::get('/module-master/add', [ModuleController::class, 'create'])->name('master.create');
-        Route::get('/module-master/{id}/edit', [ModuleController::class, 'edit'])->name('master.edit');
+        Route::get('/module-master/{module_id}/edit', [ModuleController::class, 'edit'])->name('master.edit');
+
         Route::post('/module-master', [ModuleController::class, 'store'])->name('master.store');
-        Route::put('/module-master/{id}', [ModuleController::class, 'update'])->name('master.update');
-        Route::delete('/module-master/{id}', [ModuleController::class, 'destroy'])->name('master.destroy');
+        Route::put('/module-master/{module_id}', [ModuleController::class, 'update'])->name('master.update');
+        Route::delete('/module-master/{module_id}', [ModuleController::class, 'destroy'])->name('master.destroy');
         Route::get('/module-master/api', [ModuleController::class, 'getModules'])->name('module.master.api');
 
         // API route for subtopics
