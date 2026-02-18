@@ -4,335 +4,433 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\DB;use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\IOFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
+use PhpOffice\PhpWord\TemplateProcessor;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+
+
+
+
+
+
+
+
 
 class ModuleController extends Controller
 {
     /**
      * Display a listing of modules.
      */
-    public function index()
-    {
-        $modules = DB::table('module_master')->get();
-        return view('admin.pages.module_management.module_master.index', compact('modules'));
-    }
+  public function index()
+{
+    $modules = DB::table('modules')
+        ->leftJoin('categories', 'modules.category_id', '=', 'categories.id')
+        ->leftJoin('module_totals', 'modules.id', '=', 'module_totals.module_id')
+        ->select(
+            'modules.id',
+            'modules.subject',
+            'modules.summary_title',
+            'modules.module_doc_no',
+            'modules.rev_no',
+            'modules.date2',
+            'categories.title as category_title',
+            'module_totals.total_sessions'
+        )
+        ->orderBy('modules.id','desc')
+        ->get();
+
+    return view('admin.pages.module_management.module_master.index', compact('modules'));
+}
+
+
+public function create()
+{
+    $categories = DB::table('categories')
+        ->orderBy('title', 'asc')
+        ->get();
+
+    return view('admin.pages.module_management.module_master.create', compact('categories'));
+}
+
 
     /**
      * Show the form for creating a new module.
      */
-    public function create()
-    {
-        $topics = DB::table('topics')->get();
-        return view('admin.pages.module_management.module_master.create', compact('topics'));
-    }
-
-    /**
-     * Store a newly created module in storage.
-     */
 public function store(Request $request)
 {
     \Log::info('========== MODULE STORE START ==========');
-    \Log::info('Incoming Request Data:', $request->all());
-
-    $validated = $request->validate([
-        'module_name' => 'required|string|max:255',
-        'module_code' => 'nullable|string|max:100',
-        'subject' => 'required|string|max:255',
-        'version' => 'nullable|string|max:50',
-        'total_sessions' => 'nullable|integer|min:1',
-        'sequence' => 'nullable|integer|min:1',
-        'start_date' => 'required|date',
-        'end_date' => 'required|date|after_or_equal:start_date',
-        'duration_days' => 'required|integer|min:1',
-        'status' => 'required|in:Planned,In Progress,Completed',
-        'mapped_domain' => 'nullable|boolean',
-        'mapped_functional' => 'nullable|boolean',
-        'mapped_behavioral' => 'nullable|boolean',
-        'mapped_other' => 'nullable|boolean',
-        'module_objectives' => 'nullable|string',
-        'prerequisites' => 'nullable|array',
-        'topics' => 'nullable|array',
-        'subtopics' => 'nullable|array'
-    ]);
-
-    DB::beginTransaction();
-    \Log::info('Transaction Started');
+    \Log::info('Incoming Request:', $request->all());
 
     try {
-        // Step 1: Insert module into module_master
-        $moduleId = DB::table('module_master')->insertGetId([
-            'module_name' => $request->module_name,
-            'module_code' => $request->module_code,
-            'subject' => $request->subject,
-            'version' => $request->version,
-            'total_sessions' => $request->total_sessions,
-            'sequence' => $request->sequence,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'duration_days' => $request->duration_days,
-            'status' => $request->status,
-            'mapped_domain' => $request->has('mapped_domain') ? 1 : 0,
-            'mapped_functional' => $request->has('mapped_functional') ? 1 : 0,
-            'mapped_behavioral' => $request->has('mapped_behavioral') ? 1 : 0,
-            'mapped_other' => $request->has('mapped_other') ? 1 : 0,
-            'module_objectives' => $request->module_objectives,
-            'created_at' => now(),
-            'updated_at' => now()
+        \Log::info('Validating request...');
+        $request->validate([
+            'summary_title' => 'required|string|max:255',
+            'subject' => 'required|string|max:255',
+            'category_id' => 'nullable|integer',
+            'module_doc_no' => 'nullable|string|max:255',
+            'rev_no' => 'required|string|max:20',
+            'form_date' => 'required|date',
+            'date2' => 'nullable|date',
+            'mapped_competency' => 'required|in:Domain,Functional,Behavioral,All Competencies',
+            'total_sessions' => 'required|integer|min:1',
+            'no_of_days' => 'required|integer|min:1'
+        ]);
+        \Log::info('Validation passed');
+    } catch (\Exception $e) {
+        \Log::error('Validation error: '.$e->getMessage());
+        return back()->with('error','Validation failed');
+    }
+
+    DB::beginTransaction();
+    \Log::info('Transaction started');
+
+    try {
+
+        // Insert module
+        $moduleId = DB::table('modules')->insertGetId([
+            'summary_title'     => $request->summary_title,
+            'subject'           => $request->subject,
+            'category_id'       => $request->category_id,
+            'module_doc_no'     => $request->module_doc_no,
+            'rev_no'            => $request->rev_no,
+            'form_date'         => $request->form_date,
+            'date2'             => $request->date2,
+            'mapped_competency' => $request->mapped_competency,
+            'created_at'        => now(),
+            'updated_at'        => now()
         ]);
 
-        \Log::info('Module Inserted Successfully', ['module_id' => $moduleId]);
+        \Log::info('Module inserted. ID = '.$moduleId);
 
-        // Step 2: Save prerequisites
-        if (!empty($request->prerequisites)) {
-            foreach ($request->prerequisites as $prereqId) {
-                if (!empty($prereqId)) {
-                    DB::table('module_prerequisites')->insert([
-                        'module_id' => $moduleId,
-                        'prerequisite_module_id' => $prereqId,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]);
+        // Insert totals (IMPORTANT: cast to int)
+        DB::table('module_totals')->insert([
+            'module_id'     => (int) $moduleId,
+            'total_sessions' => (int) $request->total_sessions,
+            'no_of_days'     => (int) $request->no_of_days,
+            'created_at'    => now(),
+            'updated_at'    => now()
+        ]);
 
-                    \Log::info('Prerequisite Inserted', [
-                        'module_id' => $moduleId,
-                        'prerequisite_module_id' => $prereqId
-                    ]);
-                }
-            }
-        }
-
-        // Step 3: Save topics and subtopics
-        if (!empty($request->topics)) {
-            foreach ($request->topics as $index => $topicId) {
-                $subtopicId = $request->subtopics[$index] ?? null;
-
-                if (!empty($topicId)) {
-                    DB::table('module_topics')->insert([
-                        'module_id' => $moduleId,
-                        'topic_id' => $topicId,
-                        'subtopic_id' => $subtopicId,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]);
-
-                    \Log::info('Topic Inserted', [
-                        'module_id' => $moduleId,
-                        'topic_id' => $topicId,
-                        'subtopic_id' => $subtopicId
-                    ]);
-                }
-            }
-        }
+        \Log::info('module_totals inserted');
 
         DB::commit();
-        \Log::info('Transaction Committed Successfully');
-        \Log::info('========== MODULE STORE END ==========');
+        \Log::info('========== MODULE STORE SUCCESS ==========');
 
-        return redirect()->back()->with('success', 'Module added successfully!');
+        return redirect()->back()->with('success','Module created successfully');
+
     } catch (\Exception $e) {
         DB::rollBack();
 
-        \Log::error('MODULE STORE FAILED');
-        \Log::error('Error Message: ' . $e->getMessage());
-        \Log::error('Error Line: ' . $e->getLine());
-        \Log::error('Error File: ' . $e->getFile());
+        \Log::error('========== MODULE STORE FAILED ==========');
+        \Log::error('Message: '.$e->getMessage());
+        \Log::error('File: '.$e->getFile());
+        \Log::error('Line: '.$e->getLine());
 
-        return redirect()->back()->with('error', 'Failed to add module. Check logs.');
-        }
-    }
-
-    /**
-     * Show the form for editing the specified module.
-     */
-   public function edit($module_id)
-{
-    try {
-        \Log::info('Edit method called with module_id: ' . $module_id);
-
-        $module = DB::table('module_master')->where('module_id', $module_id)->first();
-
-        if (!$module) {
-            return redirect()->back()->with('error', 'Module not found');
-        }
-
-        $prerequisites = DB::table('module_prerequisites')
-            ->where('module_id', $module_id)
-            ->pluck('prerequisite_module_id')
-            ->toArray();
-
-        $moduleTopics = DB::table('module_topics')
-            ->where('module_id', $module_id)
-            ->get()
-            ->toArray();
-
-        $topics = DB::table('topics')->get();
-
-        return view('admin.pages.module_management.module_master.edit', compact(
-            'module', 'prerequisites', 'moduleTopics', 'topics'
-        ));
-    } catch (\Exception $e) {
-        \Log::error('Edit method error: ' . $e->getMessage());
-        return redirect()->back()->with('error', 'Error loading edit page: ' . $e->getMessage());
+        return redirect()->back()->with('error','Save failed. Check logs.');
     }
 }
+
+
+
 
 
     /**
      * Update the specified module in storage.
      */
-    public function update(Request $request, $id)
-    {
-        \Log::info('========== MODULE UPDATE START ==========');
-        \Log::info('Module ID:', ['id' => $id]);
-        \Log::info('Incoming Request Data:', $request->all());
+public function edit($id)
+{
+    $module = DB::table('modules')
+        ->leftJoin('module_totals','modules.id','=','module_totals.module_id')
+        ->select(
+            'modules.*',
+            'module_totals.total_sessions',
+            'module_totals.no_of_days'
+        )
+        ->where('modules.id',$id)
+        ->first();
 
-        $validated = $request->validate([
-            'module_name' => 'required|string|max:255',
-            'module_code' => 'nullable|string|max:100',
-            'subject' => 'required|string|max:255',
-            'version' => 'nullable|string|max:50',
-            'total_sessions' => 'nullable|integer|min:1',
-            'sequence' => 'nullable|integer|min:1',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'duration_days' => 'required|integer|min:1',
-            'status' => 'required|in:Planned,In Progress,Completed',
-            'mapped_domain' => 'nullable|boolean',
-            'mapped_functional' => 'nullable|boolean',
-            'mapped_behavioral' => 'nullable|boolean',
-            'mapped_other' => 'nullable|boolean',
-            'module_objectives' => 'nullable|string',
-            'prerequisites' => 'nullable|array',
-            'topics' => 'nullable|array',
-            'subtopics' => 'nullable|array'
+    if(!$module){
+        return redirect()->back()->with('error','Module not found');
+    }
+
+    $categories = DB::table('categories')
+        ->orderBy('title', 'asc')
+        ->get();
+
+    return view('admin.pages.module_management.module_master.edit', compact('module', 'categories'));
+}
+
+
+public function update(Request $request, $id)
+{
+    \Log::info("========== MODULE UPDATE START ==========");
+    \Log::info("Module ID: ".$id);
+    \Log::info("Incoming Data:", $request->all());
+
+    try {
+
+        \Log::info("Validating request...");
+
+        $request->validate([
+            'summary_title' => 'required|max:255',
+            'subject' => 'required|max:255',
+            'category_id' => 'nullable|integer',
+            'module_doc_no' => 'nullable|string|max:255',
+            'rev_no' => 'required|max:20',
+            'form_date' => 'required|date',
+            'date2' => 'nullable|date',
+            'mapped_competency' => 'required|in:Domain,Functional,Behavioral,All Competencies',
+            'total_sessions' => 'required|integer|min:1',
+            'no_of_days' => 'required|integer|min:1'
         ]);
 
-        DB::beginTransaction();
-        \Log::info('Transaction Started');
+        \Log::info("Validation passed");
 
-        try {
-            // Step 1: Update module in module_master
-            DB::table('module_master')->where('module_id', $id)->update([
-                'module_name' => $request->module_name,
-                'module_code' => $request->module_code,
-                'subject' => $request->subject,
-                'version' => $request->version,
-                'total_sessions' => $request->total_sessions,
-                'sequence' => $request->sequence,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'duration_days' => $request->duration_days,
-                'status' => $request->status,
-                'mapped_domain' => $request->has('mapped_domain') ? 1 : 0,
-                'mapped_functional' => $request->has('mapped_functional') ? 1 : 0,
-                'mapped_behavioral' => $request->has('mapped_behavioral') ? 1 : 0,
-                'mapped_other' => $request->has('mapped_other') ? 1 : 0,
-                'module_objectives' => $request->module_objectives,
-                'updated_at' => now()
-            ]);
-
-            \Log::info('Module Updated Successfully');
-
-            // Step 2: Delete existing prerequisites
-            DB::table('module_prerequisites')->where('module_id', $id)->delete();
-
-            // Step 3: Save new prerequisites
-            if (!empty($request->prerequisites)) {
-                foreach ($request->prerequisites as $prereqId) {
-                    if (!empty($prereqId)) {
-                        DB::table('module_prerequisites')->insert([
-                            'module_id' => $id,
-                            'prerequisite_module_id' => $prereqId,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ]);
-                    }
-                }
-            }
-
-            // Step 4: Delete existing topics
-            DB::table('module_topics')->where('module_id', $id)->delete();
-
-            // Step 5: Save new topics and subtopics
-            if (!empty($request->topics)) {
-                foreach ($request->topics as $index => $topicId) {
-                    $subtopicId = $request->subtopics[$index] ?? null;
-
-                    if (!empty($topicId)) {
-                        DB::table('module_topics')->insert([
-                            'module_id' => $id,
-                            'topic_id' => $topicId,
-                            'subtopic_id' => $subtopicId,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ]);
-                    }
-                }
-            }
-
-            DB::commit();
-            \Log::info('Transaction Committed Successfully');
-            \Log::info('========== MODULE UPDATE END ==========');
-
-            return redirect()->back()->with('success', 'Module updated successfully!');
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            \Log::error('MODULE UPDATE FAILED');
-            \Log::error('Error Message: ' . $e->getMessage());
-            \Log::error('Error Line: ' . $e->getLine());
-            \Log::error('Error File: ' . $e->getFile());
-
-            return redirect()->back()->with('error', 'Failed to update module. Check logs.');
-        }
+    } catch (\Exception $e) {
+        \Log::error("VALIDATION FAILED: ".$e->getMessage());
+        return back()->with('error','Validation failed. Check logs.');
     }
+
+    DB::beginTransaction();
+    \Log::info("Transaction started");
+
+    try {
+
+        \Log::info("Updating modules table...");
+
+        $rows = DB::table('modules')->where('id',$id)->update([
+            'summary_title' => $request->summary_title,
+            'subject' => $request->subject,
+            'category_id' => $request->category_id,
+            'module_doc_no' => $request->module_doc_no,
+            'rev_no' => $request->rev_no,
+            'form_date' => $request->form_date,
+            'date2' => $request->date2,
+            'mapped_competency' => $request->mapped_competency,
+            'updated_at' => now()
+        ]);
+
+        \Log::info("Modules rows affected: ".$rows);
+
+        \Log::info("Updating module_totals table...");
+
+        $rows2 = DB::table('module_totals')->where('module_id',$id)->update([
+            'total_sessions' => $request->total_sessions,
+            'no_of_days' => $request->no_of_days,
+            'updated_at' => now()
+        ]);
+
+        \Log::info("Totals rows affected: ".$rows2);
+
+        DB::commit();
+        \Log::info("Transaction committed");
+        \Log::info("========== MODULE UPDATE SUCCESS ==========");
+
+        return back()->with('success','Module updated successfully');
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        \Log::error("========== MODULE UPDATE FAILED ==========");
+        \Log::error("Message: ".$e->getMessage());
+        \Log::error("File: ".$e->getFile());
+        \Log::error("Line: ".$e->getLine());
+
+        return back()->with('error','Update failed. Check logs.');
+    }
+}
+
+
+
 
     /**
      * Remove the specified module from storage.
      */
-    public function destroy($module_id)
-    {
-        try {
-            \Log::info('========== MODULE DELETE START ==========');
-            \Log::info('Module ID:', ['module_id' => $module_id]);
+public function destroy($id)
+{
+    DB::beginTransaction();
+    try {
 
-            DB::beginTransaction();
+        DB::table('module_contents')->where('module_id',$id)->delete();
+        DB::table('module_totals')->where('module_id',$id)->delete();
+        DB::table('modules')->where('id',$id)->delete();
 
-            // Step 1: Delete module prerequisites
-            $deletedPrereqs = DB::table('module_prerequisites')
-                ->where('module_id', $module_id)
-                ->delete();
-            
-            \Log::info('Prerequisites deleted:', ['count' => $deletedPrereqs]);
+        DB::commit();
+        return redirect()->back()->with('success','Module deleted');
 
-            // Step 2: Delete module topics
-            $deletedTopics = DB::table('module_topics')
-                ->where('module_id', $module_id)
-                ->delete();
-            
-            \Log::info('Topics deleted:', ['count' => $deletedTopics]);
-
-            // Step 3: Delete the main module
-            $deletedModule = DB::table('module_master')
-                ->where('module_id', $module_id)
-                ->delete();
-            
-            \Log::info('Module deleted:', ['count' => $deletedModule]);
-
-            DB::commit();
-            \Log::info('========== MODULE DELETE END ==========');
-
-            return redirect()->back()->with('success', 'Module deleted successfully!');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            \Log::error('MODULE DELETE FAILED');
-            \Log::error('Error Message: ' . $e->getMessage());
-            \Log::error('Error Line: ' . $e->getLine());
-            \Log::error('Error File: ' . $e->getFile());
-
-            return redirect()->back()->with('error', 'Failed to delete module. Check logs.');
-        }
+    } catch (\Exception $e){
+        DB::rollBack();
+        return redirect()->back()->with('error',$e->getMessage());
     }
+}
+
+
+public function exportWord()
+{
+    Log::info('========== WORD EXPORT START ==========');
+
+    try {
+
+        if (!class_exists(\ZipArchive::class)) {
+            Log::error('ZipArchive missing (PHP zip extension not enabled)');
+            return back()->with('error', 'Word export requires the PHP "zip" extension (ZipArchive). Enable it in php.ini (extension=zip) and restart the server.');
+        }
+
+        // Step 1 – Fetch module
+        Log::info('Fetching latest module...');
+        $module = DB::table('modules')
+            ->leftJoin('module_totals','modules.id','=','module_totals.module_id')
+            ->select(
+                'modules.*',
+                'module_totals.total_sessions',
+                'module_totals.no_of_days'
+            )
+            ->latest('modules.id')
+            ->first();
+
+        if(!$module){
+            Log::error('No module found');
+            return back()->with('error','No module found');
+        }
+
+        Log::info('Module loaded', (array)$module);
+
+        // Step 2 – Fetch contents
+        Log::info('Fetching module contents...');
+        $contents = DB::table('module_contents')
+            ->where('module_id',$module->id)
+            ->get();
+
+        Log::info('Contents count: '.count($contents));
+
+        // Step 3 – Load template
+        $templateCandidates = [
+            storage_path('app/templates/QFF64.docx'),
+            storage_path('app/templates/training_module.docx'),
+        ];
+
+        $templatePath = null;
+        foreach ($templateCandidates as $candidate) {
+            if (file_exists($candidate)) {
+                $templatePath = $candidate;
+                break;
+            }
+        }
+
+        Log::info('Template selected: '.($templatePath ?? 'NONE'));
+
+        if (!$templatePath) {
+            $docPath = storage_path('app/templates/training_module.doc');
+            if (file_exists($docPath)) {
+                Log::error('Found .doc template but no .docx template');
+                return back()->with('error', 'TemplateProcessor requires a .docx template. Please convert this file to .docx and save it as: storage/app/templates/training_module.docx');
+            }
+
+            Log::error('Template file missing!');
+            return back()->with('error', 'Template file not found. Expected: storage/app/templates/QFF64.docx or storage/app/templates/training_module.docx');
+        }
+
+        $template = new TemplateProcessor($templatePath);
+        Log::info('Template loaded');
+
+        $templateVars = $template->getVariables();
+        Log::info('Template variables', ['count' => count($templateVars), 'vars' => $templateVars]);
+
+        $setIfExists = function (string $key, $value) use ($template, $templateVars) {
+            if (in_array($key, $templateVars, true)) {
+                $template->setValue($key, $value);
+                return true;
+            }
+            return false;
+        };
+
+        // ===============================
+        // Header fields
+        // ===============================
+        Log::info('Injecting header fields...');
+        $setIfExists('docno', $module->module_doc_no ?? '');
+        $setIfExists('subject', $module->subject ?? '');
+        $setIfExists('summary', $module->summary_title ?? '');
+        $setIfExists('revno', $module->rev_no ?? '');
+        $setIfExists('date', $module->form_date ? date('d.m.Y', strtotime($module->form_date)) : '');
+        $setIfExists('date2', $module->date2 ? date('d.m.Y', strtotime($module->date2)) : '');
+
+        // ===============================
+        // Competency
+        // ===============================
+        Log::info('Setting competency checkboxes...');
+        $setIfExists('domain', $module->mapped_competency == 'Domain' ? '✔' : '');
+        $setIfExists('functional', $module->mapped_competency == 'Functional' ? '✔' : '');
+        $setIfExists('behavioral', $module->mapped_competency == 'Behavioral' ? '✔' : '');
+
+        // ===============================
+        // Totals
+        // ===============================
+        $setIfExists('totalsessions', $module->total_sessions ?? '');
+        $setIfExists('days', $module->no_of_days ?? '');
+
+        // ===============================
+        // Table rows
+        // ===============================
+        Log::info('Generating training rows...');
+        $requiredRowVars = ['sl', 'content', 'sessions', 'page'];
+        $missingRowVars = array_values(array_diff($requiredRowVars, $templateVars));
+
+        if (!empty($missingRowVars)) {
+            Log::warning('Template row variables missing; skipping training rows', ['missing' => $missingRowVars]);
+        } elseif (count($contents) === 0) {
+            Log::info('No module contents; skipping training rows');
+        } else {
+            $template->cloneRow('sl', count($contents));
+
+            foreach ($contents as $i => $row) {
+                $n = $i + 1;
+                $template->setValue("sl#$n", $n);
+                $template->setValue("content#$n", $row->topic ?? '');
+                $template->setValue("sessions#$n", $row->sessions ?? '');
+                $template->setValue("page#$n", $row->page_no ?? '');
+            }
+        }
+
+        // ===============================
+        // Save file
+        // ===============================
+        $dir = storage_path('app/temp');
+        if(!file_exists($dir)){
+            mkdir($dir, 0777, true);
+            Log::info('Temp directory created');
+        }
+
+        $fileName = 'DMRCA_QFF64_'.$module->module_doc_no.'.docx';
+        $path = $dir.'/'.$fileName;
+
+        Log::info('Saving file to '.$path);
+        $template->saveAs($path);
+
+        if(!file_exists($path)){
+            Log::error('File not created after save');
+            return back()->with('error','File generation failed');
+        }
+
+        Log::info('File created successfully');
+        Log::info('========== WORD EXPORT SUCCESS ==========');
+
+        return response()->download($path)->deleteFileAfterSend();
+
+    } catch (\Throwable $e) {
+
+        Log::error('========== WORD EXPORT FAILED ==========');
+        Log::error('Message: '.$e->getMessage());
+        Log::error('File: '.$e->getFile());
+        Log::error('Line: '.$e->getLine());
+
+        return back()->with('error','Export failed. Check logs.');
+    }
+}
+
+
 }

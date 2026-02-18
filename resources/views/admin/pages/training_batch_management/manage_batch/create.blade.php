@@ -141,6 +141,17 @@
                 </select>
             </div>
 
+              <div class="col-12 form-group">
+                <label class="form-label">Batch Code <span class="required">*</span></label>
+                <input type="text" class="form-control" name="batch_code" id="batch_code" required
+                       placeholder="Auto-generated from selections" readonly>
+                <div class="help-text mt-2">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Auto-generated from Company, Designation, and Training Type selections.
+                    Format: [Company Code]-[Designation Code]-[Training Type Code]/2026-###
+                </div>
+            </div>
+
             <!-- Batch Coordinator -->
             <div class="col-12 form-group">
                 <label class="form-label">Batch Coordinator</label>
@@ -172,21 +183,14 @@
                 <label class="form-label">Training Program <span class="required">*</span></label>
                 <select class="form-select" name="batch_name" required>
                     <option value="">Select Training Program</option>
-                    <option value="Project Management Fundamentals">Project Management Fundamentals</option>
+                    @foreach($trainingPrograms as $program)
+                        <option value="{{ $program->title }}">{{ $program->title }}</option>
+                    @endforeach
                 </select>
             </div>
 
             <!-- Batch Code -->
-            <div class="col-12 form-group">
-                <label class="form-label">Batch Code <span class="required">*</span></label>
-                <input type="text" class="form-control" name="batch_code" id="batch_code" required
-                       placeholder="Auto-generated from selections" readonly>
-                <div class="help-text mt-2">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Auto-generated from Company, Designation, and Training Type selections.
-                    Format: [Company Code]-[Designation Code]-[Training Type Code]/2026-###
-                </div>
-            </div>
+          
 
             <!-- Venue -->
             <div class="col-12 form-group">
@@ -204,11 +208,15 @@
             <!-- Module Master -->
             <div class="col-12 form-group">
                 <label class="form-label">Module Master <span class="required">*</span></label>
-                <select class="form-select" name="module_master_id" required>
+                <select class="form-select" name="module_master_id"
+ required>
                     <option value="">-- Select --</option>
-                    @foreach($modules as $module)
-                        <option value="{{ $module->topic_id }}">{{ $module->topic }}</option>
-                    @endforeach
+                   @foreach($modules as $module)
+    <option value="{{ $module->module_id }}">
+        {{ $module->module_name }}
+    </option>
+@endforeach
+
                 </select>
             </div>
 

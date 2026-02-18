@@ -20,203 +20,104 @@
 
     <div class="card border-primary" style="width:163%; margin-left:33px;">
         <div class="card-body">
-            <form method="post" action="{{ route('admin.module.master.update', $module->module_id) }}" onsubmit="debugFormSubmit(event)">
-                @csrf
-                @method('PUT')
-                <input type="hidden" name="topic_id" id="primary_topic_id" value="0">
-                <input type="hidden" name="subtopic_id" id="primary_subtopic_id" value="0">
+         <form method="post" action="{{ route('admin.module.master.update', $module->id) }}">
+@csrf
+@method('PUT')
 
-                <div class="mb-3">
-                    <label class="form-label">Module Name *</label>
-                    <input type="text" class="form-control" name="module_name" value="{{ $module->module_name }}" placeholder="Enter module name" required>
-                </div>
+<div class="mb-3">
+    <label>Summary Title *</label>
+    <input type="text" class="form-control" name="summary_title"
+           value="{{ $module->summary_title }}" required>
+</div>
 
-                <div class="mb-3">
-                    <label class="form-label">Module Code</label>
-                    <input type="text" class="form-control" name="module_code" value="{{ $module->module_code }}" placeholder="Enter module code (optional)">
-                </div>
+<div class="mb-3">
+    <label>Subject *</label>
+    <input type="text" class="form-control" name="subject"
+           value="{{ $module->subject }}" required>
+</div>
 
-                <div class="mb-3">
-                    <label class="form-label">Subject *</label>
-                    <input type="text" class="form-control" name="subject" value="{{ $module->subject }}" placeholder="Enter subject" required>
-                </div>
+<div class="mb-3">
+    <label>Category</label>
+    <select name="category_id" class="form-control">
+        <option value="">Select Category</option>
+        @foreach($categories as $category)
+            <option value="{{ $category->id }}" {{ (old('category_id', $module->category_id) == $category->id) ? 'selected' : '' }}>
+                {{ $category->title }}
+            </option>
+        @endforeach
+    </select>
+</div>
 
-                <div class="mb-3">
-                    <label class="form-label">Version</label>
-                    <input type="text" class="form-control" name="version" value="{{ $module->version }}" placeholder="Enter version (e.g., 1.0, 2.1)">
-                </div>
+<div class="mb-3">
+    <label>Module Doc No</label>
+    <input type="text" class="form-control" name="module_doc_no"
+           value="{{ old('module_doc_no', $module->module_doc_no) }}">
+</div>
 
-                <div class="mb-3">
-                    <label class="form-label">Total Sessions</label>
-                    <input type="number" class="form-control" name="total_sessions" value="{{ $module->total_sessions }}" placeholder="Enter total sessions">
-                </div>
+<div class="mb-3">
+    <label>Revision No *</label>
+    <input type="text" class="form-control" name="rev_no"
+           value="{{ $module->rev_no }}" required>
+</div>
 
-                <div class="mb-3">
-                    <label class="form-label">Sequence</label>
-                    <input type="number" class="form-control" name="sequence" value="{{ $module->sequence }}" placeholder="Enter sequence order">
-                </div>
+<div class="mb-3">
+    <label>Date *</label>
+    <input type="date" class="form-control" name="form_date"
+           value="{{ $module->form_date }}" required>
+</div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">Start Date *</label>
-                            <input type="date" class="form-control" name="start_date" value="{{ $module->start_date }}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">End Date *</label>
-                            <input type="date" class="form-control" name="end_date" value="{{ $module->end_date }}" required>
-                        </div>
-                    </div>
-                </div>
+<div class="mb-3">
+    <label>Date2</label>
+    <input type="date" class="form-control" name="date2"
+           value="{{ old('date2', $module->date2) }}">
+</div>
 
-                <div class="mb-3">
-                    <label class="form-label">Duration (Days) *</label>
-                    <input type="number" class="form-control" name="duration_days" id="duration_days" value="{{ $module->duration_days }}" placeholder="Enter duration in days" required>
-                </div>
+<hr>
 
-                <div class="mb-3">
-                    <label class="form-label">Status *</label>
-                    <select class="form-control" name="status" required>
-                        <option value="">Select Status</option>
-                        <option value="Planned" {{ $module->status == 'Planned' ? 'selected' : '' }}>Planned</option>
-                        <option value="In Progress" {{ $module->status == 'In Progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="Completed" {{ $module->status == 'Completed' ? 'selected' : '' }}>Completed</option>
-                    </select>
-                </div>
+<h5>Mapped Competency</h5>
+<div class="row">
+    <div class="col-md-4">
+        <input type="radio" name="mapped_competency" value="Domain"
+               {{ $module->mapped_competency=='Domain'?'checked':'' }}> Domain
+    </div>
+    <div class="col-md-4">
+        <input type="radio" name="mapped_competency" value="Functional"
+               {{ $module->mapped_competency=='Functional'?'checked':'' }}> Functional
+    </div>
+    <div class="col-md-4">
+        <input type="radio" name="mapped_competency" value="Behavioral"
+               {{ $module->mapped_competency=='Behavioral'?'checked':'' }}> Behavioral
+    </div>
+    <div class="col-md-4">
+        <input type="radio" name="mapped_competency" value="All Competencies"
+               {{ $module->mapped_competency=='All Competencies'?'checked':'' }}> All Competencies
+    </div>
+</div>
 
-                <div class="mb-3">
-                    <label class="form-label">Module Objectives</label>
-                    <textarea class="form-control" name="module_objectives" rows="3" placeholder="Enter module objectives and dependencies">{{ $module->module_objectives }}</textarea>
-                </div>
+<hr>
 
-                <!-- Topics and Subtopics Section -->
-                <div class="mt-4" style="width:90%;">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5>Topics and Subtopics</h5>
-                        <button type="button" class="btn btn-sm btn-primary" onclick="addTopicRow()">
-                            <i class="bi bi-plus"></i> Add Topic
-                        </button>
-                    </div>
-                    
-                    <div id="topicsContainer">
-                        <!-- Existing topics will be loaded here -->
-                        @foreach($moduleTopics as $index => $moduleTopic)
-                            <div class="topic-row mb-3 p-3 border rounded">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Topic</label>
-                                        <select class="form-control topic-select" name="topics[]" onchange="loadSubtopics(this)">
-                                            <option value="">Select Topic</option>
-                                            @foreach($topics as $topic)
-                                                <option value="{{ $topic->topic_id }}" {{ $moduleTopic->topic_id == $topic->topic_id ? 'selected' : '' }}>{{ $topic->topic }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Subtopic</label>
-                                        <select class="form-control subtopic-select" name="subtopics[]">
-                                            <option value="">Select Topic First</option>
-                                            @if($moduleTopic->subtopic_id)
-                                                <!-- Subtopics will be loaded via JavaScript -->
-                                            @endif
-                                        </select>
-                                    </div>
-                                </div>
-                                <button type="button" class="btn btn-sm btn-danger mt-2" onclick="removeTopicRow(this)">
-                                    <i class="bi bi-trash"></i> Remove
-                                </button>
-                            </div>
-                        @endforeach
-                        
-                        @if(count($moduleTopics) == 0)
-                            <!-- Add one empty row if no existing topics -->
-                            <div class="topic-row mb-3 p-3 border rounded">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Topic</label>
-                                        <select class="form-control topic-select" name="topics[]" onchange="loadSubtopics(this)">
-                                            <option value="">Select Topic</option>
-                                            @foreach($topics as $topic)
-                                                <option value="{{ $topic->topic_id }}">{{ $topic->topic }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Subtopic</label>
-                                        <select class="form-control subtopic-select" name="subtopics[]">
-                                            <option value="">Select Topic First</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <button type="button" class="btn btn-sm btn-danger mt-2" onclick="removeTopicRow(this)">
-                                    <i class="bi bi-trash"></i> Remove
-                                </button>
-                            </div>
-                        @endif
-                    </div>
-                </div>
+<div class="mb-3">
+    <label>Total Sessions *</label>
+    <input type="number" class="form-control" name="total_sessions"
+           value="{{ $module->total_sessions }}" required>
+</div>
 
-                <!-- Mapped Competency Section -->
-                <div class="mt-4">
-                    <h5 class="mb-3">Mapped Competency</h5>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="mapped_domain" value="1" {{ $module->mapped_domain ? 'checked' : '' }}>
-                                <label class="form-check-label">Domain</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="mapped_functional" value="1" {{ $module->mapped_functional ? 'checked' : '' }}>
-                                <label class="form-check-label">Functional</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="mapped_behavioral" value="1" {{ $module->mapped_behavioral ? 'checked' : '' }}>
-                                <label class="form-check-label">Behavioral</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="mapped_other" value="1" {{ $module->mapped_other ? 'checked' : '' }}>
-                                <label class="form-check-label">Other</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="mb-3">
+    <label>No of Days *</label>
+    <input type="number" class="form-control" name="no_of_days"
+           value="{{ $module->no_of_days }}" required>
+</div>
 
-                <!-- Prerequisites Section -->
-                <div class="mt-4">
-                    <h5 class="mb-3">Prerequisites</h5>
-                    <div class="row">
-                        @php
-                            $allModules = DB::table('module_master')->where('module_id', '!=', $module->module_id)->get();
-                        @endphp
-                        @foreach($allModules as $prereqModule)
-                            <div class="col-md-4 mb-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="prerequisites[]" value="{{ $prereqModule->module_id }}" 
-                                           @if(in_array($prereqModule->module_id, $prerequisites)) checked @endif>
-                                    <label class="form-check-label">{{ $prereqModule->module_name }}</label>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
+<button type="submit" class="btn btn-primary">
+    Update Module
+</button>
 
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Update Module
-                    </button>
-                    <a href="{{ route('admin.module.master') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Back to Modules
-                    </a>
-                </div>
-            </form>
+<a href="{{ route('admin.module.master') }}" class="btn btn-secondary">
+    Back
+</a>
+
+</form>
+
         </div>
     </div>
 </div>

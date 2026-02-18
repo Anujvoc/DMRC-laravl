@@ -23,175 +23,116 @@
         
 
         <div class="card-body">
-            <form method="post" action="{{ route('admin.module.master.store') }}" onsubmit="debugFormSubmit(event)">
-                @csrf
-                <input type="hidden" name="topic_id" id="primary_topic_id" value="0">
-                <input type="hidden" name="subtopic_id" id="primary_subtopic_id" value="0">
+         <form method="post" action="{{ route('admin.module.master.store') }}">
+@csrf
 
-                <div class="mb-3">
-                    <label class="form-label">Module Name *</label>
-                    <input type="text" class="form-control" name="module_name" placeholder="Enter module name" required>
-                </div>
+<div class="row">
 
-                <div class="mb-3">
-                    <label class="form-label">Module Code</label>
-                    <input type="text" class="form-control" name="module_code" placeholder="Enter module code (optional)">
-                </div>
+    <div class="col-md-6 mb-3">
+        <label>Summary Title *</label>
+        <input type="text" name="summary_title" class="form-control" required>
+    </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Subject *</label>
-                    <input type="text" class="form-control" name="subject" placeholder="Enter subject" required>
-                </div>
+    <div class="col-md-6 mb-3">
+        <label>Subject *</label>
+        <input type="text" name="subject" class="form-control" required>
+    </div>
 
-             
+    <div class="col-md-4 mb-3">
+        <label>Category</label>
+        <select name="category_id" class="form-control">
+            <option value="">Select Category</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                    {{ $category->title }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Version</label>
-                    <input type="text" class="form-control" name="version" placeholder="Enter version (e.g., 1.0, 2.1)">
-                </div>
+    <div class="col-md-4 mb-3">
+        <label>Module Doc No</label>
+        <input type="text" name="module_doc_no" class="form-control" value="{{ old('module_doc_no') }}">
+    </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Total Sessions</label>
-                    <input type="number" class="form-control" name="total_sessions" placeholder="Enter total sessions" min="1">
-                </div>
+    <div class="col-md-4 mb-3">
+        <label>Revision No *</label>
+        <input type="text" name="rev_no" class="form-control" required>
+    </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Sequence Order</label>
-                    <input type="number" class="form-control" name="sequence" placeholder="Enter sequence order" min="1">
-                </div>
+    <div class="col-md-4 mb-3">
+        <label>Form Date *</label>
+        <input type="date" name="form_date" class="form-control" required>
+    </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Start Date *</label>
-                    <input type="date" class="form-control" name="start_date" required>
-                </div>
+    <div class="col-md-4 mb-3">
+        <label>Date2</label>
+        <input type="date" name="date2" class="form-control" value="{{ old('date2') }}">
+    </div>
 
-                <div class="mb-3">
-                    <label class="form-label">End Date *</label>
-                    <input type="date" class="form-control" name="end_date" required>
-                </div>
+    <div class="form-group">
+    <label><b>Mapped Competency</b></label>
 
-                <div class="mb-3">
-                    <label class="form-label">Duration (Days) *</label>
-                    <input type="number" class="form-control" name="duration_days" placeholder="Enter duration in days" min="1" required>
-                </div>
+    <div style="display:flex; gap:30px; margin-top:8px">
 
-                <div class="mb-3">
-                    <label class="form-label">Status *</label>
-                    <select class="form-control" name="status" required>
-                        <option value="">Select Status</option>
-                        <option value="Planned">Planned</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
-                    </select>
-                </div>
+        <label>
+            <input type="radio" name="mapped_competency" value="Domain" required>
+            Domain
+        </label>
 
-             
-               <label for="">Pre-requisites</label>
-                <?php
-                $existingModules = DB::table('training_modules')->get();
-                ?>
-                @if($existingModules->count() > 0)
-                    @foreach($existingModules as $module)
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" name="prerequisites[]" id="prereq_{{ $module->module_id }}" value="{{ $module->module_id }}">
-                            <label class="form-check-label" for="prereq_{{ $module->module_id }}">
-                                {{ $module->module_name }}
-                            </label>
-                        </div>
-                    @endforeach
-                @else
-                    <p class="text-muted">No existing modules available as prerequisites.</p>
-                @endif
+        <label>
+            <input type="radio" name="mapped_competency" value="Functional">
+            Functional
+        </label>
 
-                <!-- Mapped Competency Section -->
-                <div class="mb-4">
-                    <label class="form-label">Mapped Competency</label>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="mapped_domain" id="mapped_domain_comp" value="1">
-                                <label class="form-check-label" for="mapped_domain_comp">
-                                    Domain
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="mapped_functional" id="mapped_functional_comp" value="1">
-                                <label class="form-check-label" for="mapped_functional_comp">
-                                    Functional
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="mapped_behavioral" id="mapped_behavioral_comp" value="1">
-                                <label class="form-check-label" for="mapped_behavioral_comp">
-                                    Behavioral
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="mapped_other" id="mapped_other" value="1">
-                                <label class="form-check-label" for="mapped_other">
-                                    Other
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <label>
+            <input type="radio" name="mapped_competency" value="Behavioral">
+            Behavioral
+        </label>
 
-                <div class="mb-3">
-                    <label class="form-label">Module Objectives</label>
-                    <textarea class="form-control" name="module_objectives" rows="3" placeholder="Enter module objectives and dependencies"></textarea>
-                </div>
+        <label>
+            <input type="radio" name="mapped_competency" value="All Competencies">
+            All Competencies
+        </label>
 
-                <!-- Topics and Subtopics Section -->
-                <div class="mt-4" style="width:90%;">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5>Topics and Subtopics</h5>
-                        <button type="button" class="btn btn-sm btn-primary" onclick="addTopicRow()">
-                            <i class="bi bi-plus"></i> Add Topic
-                        </button>
-                    </div>
-                    
-                    <div id="topicsContainer">
-                        <div class="topic-row mb-3 p-3 border rounded">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label">Topic</label>
-                                    <select class="form-control topic-select" name="topics[]" onchange="loadSubtopics(this)">
-                                        <option value="">Select Topic</option>
-                                        <?php
-                                        $topics = DB::table('topics')->get();
-                                        foreach($topics as $topic) {
-                                            echo '<option value="' . $topic->topic_id . '">' . $topic->topic . '</option>';
-                                        }
-                                        ?>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Subtopic</label>
-                                    <select class="form-control subtopic-select" name="subtopics[]">
-                                        <option value="">Select Topic First</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-danger mt-2" onclick="removeTopicRow(this)">
-                                <i class="bi bi-trash"></i> Remove
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    </div>
+</div>
 
-                <button type="submit" class="btn btn-primary">
-                    Add Module
-                </button>
-                <a href="{{ route('admin.module.master') }}" class="btn btn-secondary ms-2">
-                    Cancel
-                </a>
-            </form>
+
+</div>
+
+<hr>
+
+
+
+
+
+<h5>Module Duration</h5>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label>Total Sessions *</label>
+        <input type="number" name="total_sessions" class="form-control" required min="1">
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label>No of Days *</label>
+        <input type="number" name="no_of_days" class="form-control" required min="1">
+    </div>
+</div>
+
+<hr>
+
+<button class="btn btn-primary">
+    Save Module
+</button>
+
+<a href="{{ route('admin.module.master') }}" class="btn btn-secondary">
+    Cancel
+</a>
+
+</form>
+
         </div>
     </div>
 

@@ -116,6 +116,14 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">Module Master</h2>
         <div class="d-flex gap-2">
+
+        
+     <a href="{{ route('admin.module.export.word') }}" class="btn btn-success">
+    <i class="bi bi-file-earmark-word"></i> Export QFF-64
+</a>
+
+
+
             
             <a href="{{ route('admin.module.master.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus"></i> Add Module
@@ -129,38 +137,62 @@
     <div class="card border-0 shadow-sm" style="width:127%;">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover align-middle" id="modulesTable">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Module Name</th>
-                            <th>Subject</th>
-                            <th>Version</th>
-                            <th>Total Sessions</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($modules as $module)
-                        <tr>
-                            <td>{{$module->module_id}}</td>
-                            <td>{{$module->module_name}}</td>
-                            <td>{{$module->subject}}</td>
-                            <td>{{$module->version ?? '1.0'}}</td>
-                            <td>{{$module->total_sessions ?? 0}}</td>
-                            <td class="text-end">
-                                <a href="{{ route('admin.module.master.edit', $module->module_id) }}" class="btn btn-sm btn-outline-secondary btn-icon" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
+<table class="table table-hover align-middle" id="modulesTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Module Title</th>
+            <th>Subject</th>
+            <th>Category</th>
+            <th>Module Doc No</th>
+            <th>Revision</th>
+            <th>Date2</th>
+            <th>Total Sessions</th>
+            <th class="text-end">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($modules as $module)
+        <tr>
+            <td>{{ $module->id }}</td>
 
-                                <button class="btn btn-sm btn-danger btn-icon" title="Delete" onclick="deleteModule({{$module->module_id}})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            {{-- Summary Title = Module Name --}}
+            <td class="module-code">
+                {{ $module->summary_title }}
+            </td>
+
+            <td>{{ $module->subject }}</td>
+
+            <td>{{ $module->category_title ?? '-' }}</td>
+
+            <td>{{ $module->module_doc_no ?? '-' }}</td>
+
+            <td>{{ $module->rev_no }}</td>
+
+            <td>{{ $module->date2 ?? '-' }}</td>
+
+            <td>
+                {{ $module->total_sessions ?? 0 }}
+            </td>
+
+            <td class="text-end">
+                <a href="{{ route('admin.module.master.edit', $module->id) }}"
+                   class="btn btn-sm btn-outline-secondary btn-icon"
+                   title="Edit">
+                    <i class="fas fa-edit"></i>
+                </a>
+
+                <button class="btn btn-sm btn-danger btn-icon"
+                        title="Delete"
+                        onclick="deleteModule({{ $module->id }})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+
             </div>
         </div>
     </div>

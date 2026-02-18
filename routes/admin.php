@@ -15,6 +15,8 @@ use App\Http\Controllers\Admin\TrainingBatchController;
 use App\Http\Controllers\Admin\VenueController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\TimeTableController;
+use App\Http\Controllers\Admin\TrainingProgramController;
+use App\Http\Controllers\Admin\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,6 +88,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
     
     });
     
+    // Categories Management
+    Route::prefix('master/categories')->name('categories.')->group(function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+        Route::get('/add', [CategoryController::class, 'create'])->name('create');
+        Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit');
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+        Route::put('/{id}', [CategoryController::class, 'update'])->name('update');
+        Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy');
+    });
+    
     // Training Batch Management
     Route::prefix('training-batch')->name('training_batch.')->group(function () {
         Route::get('/', [TrainingBatchController::class, 'index'])->name('index');
@@ -99,6 +111,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/api/batch-count', [TrainingBatchController::class, 'getBatchCount'])->name('batch.count');
     });
 
+    // Training Program Management
+    Route::prefix('training-program')->name('training_program.')->group(function () {
+        Route::get('/', [TrainingProgramController::class, 'index'])->name('index');
+        Route::get('/add', [TrainingProgramController::class, 'create'])->name('create');
+        Route::get('/{id}/edit', [TrainingProgramController::class, 'edit'])->name('edit');
+        Route::post('/', [TrainingProgramController::class, 'store'])->name('store');
+        Route::put('/{id}', [TrainingProgramController::class, 'update'])->name('update');
+        Route::delete('/{id}', [TrainingProgramController::class, 'destroy'])->name('destroy');
+    });
+
       Route::prefix('module')->name('module.')->group(function () {
 
         // Module Master
@@ -110,16 +132,224 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/module-master/{module_id}', [ModuleController::class, 'update'])->name('master.update');
         Route::delete('/module-master/{module_id}', [ModuleController::class, 'destroy'])->name('master.destroy');
         Route::get('/module-master/api', [ModuleController::class, 'getModules'])->name('module.master.api');
+        Route::get('/export/word', [ModuleController::class,'exportWord'])->name('export.word');
+    
+
+
+    
+
+        
 
         // API route for subtopics
         Route::get('/api/subtopics/{topicId}', function($topicId) {
             try {
                 // Get subtopics from subtopics table
                 $subtopics = DB::table('subtopics')
+
+
+
+
                     ->where('topic_id', $topicId)
                     ->where('status', 1) // Only active subtopics
                     ->orderBy('sort_order', 'asc')
                     ->get();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    
                 
                 return response()->json($subtopics);
             } catch (\Exception $e) {

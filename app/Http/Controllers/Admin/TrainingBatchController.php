@@ -22,16 +22,18 @@ class TrainingBatchController extends Controller
         $query = DB::table('training_batches as tb')
             ->leftJoin('companies', 'tb.batch_code_company', '=', 'companies.company_id')
             ->leftJoin('designations', 'tb.batch_code_designation', '=', 'designations.designation_id')
-            ->leftJoin('topics', 'tb.module_master_id', '=', 'topics.topic_id')
+            ->leftJoin('module_master', 'tb.module_master_id', '=', 'module_master.module_id')
+
             ->leftJoin('training_types', 'tb.training_id', '=', 'training_types.training_type_id')
-            ->select(
-                'tb.*',
-                'companies.company_name',
-                'designations.designation_name',
-                'topics.topic as module_name',
-                'training_types.training_type_name',
-                'training_types.training_type_id'
-            );
+           ->select(
+    'tb.*',
+    'companies.company_name',
+    'designations.designation_name',
+    'module_master.module_name as module_name',
+    'training_types.training_type_name',
+    'training_types.training_type_id'
+);
+
         
         // Apply status filter if not 'all'
         if ($statusFilter !== 'all') {
@@ -54,8 +56,13 @@ class TrainingBatchController extends Controller
         // Get dropdown data
         $companies = DB::table('companies')->where('is_active', 1)->orderBy('company_name', 'asc')->get();
         $designations = DB::table('designations')->where('is_active', 1)->orderBy('designation_name', 'asc')->get();
-        $modules = DB::table('topics')->where('status', 1)->orderBy('topic', 'asc')->get();
+        $modules = DB::table('module_master')
+    ->where('status', 1)
+    ->orderBy('module_name', 'asc')
+    ->get();
+
         $trainingTypes = DB::table('training_types')->where('is_active', 1)->orderBy('training_type_name', 'asc')->get();
+        $trainingPrograms = DB::table('training_program')->orderBy('title', 'asc')->get();
         
         // Get venues data
         $venues = DB::table('venues')->orderBy('venue_name', 'asc')->get();
@@ -69,7 +76,7 @@ class TrainingBatchController extends Controller
             ->orderBy('name', 'asc')
             ->get();
         
-        return view('admin.pages.training_batch_management.manage_batch.create', compact('companies', 'designations', 'modules', 'trainingTypes', 'venues', 'coordinators', 'managers'));
+        return view('admin.pages.training_batch_management.manage_batch.create', compact('companies', 'designations', 'modules', 'trainingTypes', 'trainingPrograms', 'venues', 'coordinators', 'managers'));
     }
 
     /**
