@@ -125,6 +125,9 @@
                 <li><a href="{{ route('admin.master.training_types') }}">Training Types</a></li>
                 <li><a href="{{ route('admin.master.venues') }}">Venues</a></li>
                  <li><a href="{{ route('admin.master.holidays') }}">Holidays</a></li>
+                 <li><a href="{{ route('admin.master.instructors.index') }}">Instructors</a></li>
+                 <li><a href="{{ route('admin.master.subjects.index') }}">Subjects</a></li>
+                 <li><a href="{{ route('admin.master.certifications.index') }}">Certifications</a></li>
                  <li><a href="{{ route('admin.training_program.index') }}">Training Program</a></li>
                  <li><a href="{{ route('admin.categories.index') }}">Categories</a></li>
             </ul>
@@ -137,7 +140,7 @@
                 <i class="arrow"></i>
             </a>
             <ul class="submenu">
-                <li><a href="{{ route('admin.timetable-management.index') }}">Manage Timetable</a></li>
+                <li><a href="{{url('admin/timetable-management/calender/batch')}}">Manage Timetable</a></li>
                 <li><a href="#">Add Timetable Entry</a></li>
                 <li><a href="#">Teacher Replacement</a></li>
                 <li><a href="#">Daily Report</a></li>

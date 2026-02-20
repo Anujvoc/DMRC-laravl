@@ -16,7 +16,7 @@
         <div class="col-lg-8">
             <div class="card border shadow-sm">
                 <div class="card-body p-4">
-                    <form method="POST" action="{{ route('admin.master.topics.store') }}">
+                    <form method="POST" action="{{ route('admin.module.topics.store') }}">
                         @csrf
                         <div class="row g-4">
                             <!-- Topic Information -->
@@ -27,6 +27,18 @@
                             <div class="col-md-6">
                                 <label for="topic" class="form-label">Topic *</label>
                                 <input type="text" class="form-control" id="topic" name="topic" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="subject_id" class="form-label">Subject</label>
+                                <select class="form-select" id="subject_id" name="subject_id">
+                                    <option value="">Select Subject</option>
+                                    @foreach($subjects as $subject)
+                                        <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
+                                            {{ $subject->title }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                             
                             <div class="col-md-6">
@@ -60,7 +72,7 @@
                             <!-- Form Actions -->
                             <div class="col-12">
                                 <div class="d-flex gap-2 justify-content-end mt-4">
-                                    <a href="{{ route('admin.master.topics') }}" class="btn btn-outline-secondary">
+                                    <a href="{{ route('admin.module.topics') }}" class="btn btn-outline-secondary">
                                         <i class="fi fi-rr-cross me-1"></i> Cancel
                                     </a>
                                     <button type="submit" class="btn btn-primary">

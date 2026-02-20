@@ -178,19 +178,11 @@
                 </select>
             </div>
 
-            <!-- Training Program -->
-            <div class="col-12 form-group">
-                <label class="form-label">Training Program <span class="required">*</span></label>
-                <select class="form-select" name="batch_name" required>
-                    <option value="">Select Training Program</option>
-                    @foreach($trainingPrograms as $program)
-                        <option value="{{ $program->title }}">{{ $program->title }}</option>
-                    @endforeach
-                </select>
+            <!-- Batch Name -->
+            <div class="col-md-6">
+                <label for="batch_name" class="form-label">Batch Name <span class="required">*</span></label>
+                <input type="text" class="form-control" id="batch_name" name="batch_name" placeholder="Enter batch name" required>
             </div>
-
-            <!-- Batch Code -->
-          
 
             <!-- Venue -->
             <div class="col-12 form-group">
@@ -208,16 +200,17 @@
             <!-- Module Master -->
             <div class="col-12 form-group">
                 <label class="form-label">Module Master <span class="required">*</span></label>
-                <select class="form-select" name="module_master_id"
- required>
-                    <option value="">-- Select --</option>
-                   @foreach($modules as $module)
-    <option value="{{ $module->module_id }}">
-        {{ $module->module_name }}
-    </option>
-@endforeach
+              <select name="module_master_id" class="form-select" required>
+    <option value="">Select Module</option>
 
-                </select>
+    @foreach($modules as $module)
+        <option value="{{ $module->id }}">
+            {{ $module->summary_title }}
+        </option>
+    @endforeach
+</select>
+
+
             </div>
 
             <!-- Training Program -->

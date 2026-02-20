@@ -35,7 +35,17 @@
 
     <div class="col-md-6 mb-3">
         <label>Subject *</label>
-        <input type="text" name="subject" class="form-control" required>
+        <div class="border rounded p-2" style="max-height: 220px; overflow:auto;">
+            @foreach($subjects as $subject)
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="subject_ids[]" value="{{ $subject->id }}" id="subject_{{ $subject->id }}"
+                        {{ (is_array(old('subject_ids')) && in_array($subject->id, old('subject_ids'))) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="subject_{{ $subject->id }}">
+                        {{ $subject->title }}
+                    </label>
+                </div>
+            @endforeach
+        </div>
     </div>
 
     <div class="col-md-4 mb-3">
@@ -51,8 +61,20 @@
     </div>
 
     <div class="col-md-4 mb-3">
+        <label>Certification</label>
+        <select name="certification_id" class="form-control">
+            <option value="">Select Certification</option>
+            @foreach($certifications as $certification)
+                <option value="{{ $certification->id }}" {{ old('certification_id') == $certification->id ? 'selected' : '' }}>
+                    {{ $certification->iso_standard }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="col-md-4 mb-3">
         <label>Module Doc No</label>
-        <input type="text" name="module_doc_no" class="form-control" value="{{ old('module_doc_no') }}">
+        <input type="text" name="doc_no" class="form-control" value="{{ old('doc_no') }}">
     </div>
 
     <div class="col-md-4 mb-3">

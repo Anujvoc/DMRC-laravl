@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\Venue;
 
 class VenueController extends Controller
 {
@@ -55,9 +56,18 @@ class VenueController extends Controller
         return redirect()->back()->with('error','Venue updation issue');
     }
     
+     function venueToggle($id){
+    if($data = Venue::findOrFail($id)){
+    $data->is_active=$data->is_active == 1 ? 0 :1;
+     $data->save();
+    return redirect()->back()->with('success', 'Status updated successfully');
+    }
+        return redirect()->back()->with('error','You selected wrong item');
+
+}
     function destroy($id){
         if(DB::table('venues')->where('venue_id', $id)->delete()){
-            return redirect('master/venues')->with('success','Venue was Delete successfully');
+            return redirect()->back()->with('success','Venue was Delete successfully');
         }
         
         return redirect()->back()->with('error','You selected wrong item');

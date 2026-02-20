@@ -32,8 +32,20 @@
 
 <div class="mb-3">
     <label>Subject *</label>
-    <input type="text" class="form-control" name="subject"
-           value="{{ $module->subject }}" required>
+    <div class="border rounded p-2" style="max-height: 220px; overflow:auto;">
+        @foreach($subjects as $subject)
+            @php
+                $checkedIds = old('subject_ids', $selectedSubjectIds ?? []);
+            @endphp
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="subject_ids[]" value="{{ $subject->id }}" id="subject_{{ $subject->id }}"
+                    {{ (is_array($checkedIds) && in_array((string)$subject->id, array_map('strval', $checkedIds))) ? 'checked' : '' }}>
+                <label class="form-check-label" for="subject_{{ $subject->id }}">
+                    {{ $subject->title }}
+                </label>
+            </div>
+        @endforeach
+    </div>
 </div>
 
 <div class="mb-3">
@@ -49,9 +61,21 @@
 </div>
 
 <div class="mb-3">
+    <label>Certification</label>
+    <select name="certification_id" class="form-control">
+        <option value="">Select Certification</option>
+        @foreach($certifications as $certification)
+            <option value="{{ $certification->id }}" {{ (old('certification_id', $module->certification_id) == $certification->id) ? 'selected' : '' }}>
+                {{ $certification->iso_standard }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
+<div class="mb-3">
     <label>Module Doc No</label>
-    <input type="text" class="form-control" name="module_doc_no"
-           value="{{ old('module_doc_no', $module->module_doc_no) }}">
+    <input type="text" class="form-control" name="doc_no"
+           value="{{ old('doc_no', $module->doc_no) }}">
 </div>
 
 <div class="mb-3">

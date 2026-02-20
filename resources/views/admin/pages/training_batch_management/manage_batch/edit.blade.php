@@ -89,7 +89,7 @@
                                 <select class="form-select" id="module_master_id" name="module_master_id" required>
                                     <option value="">Select Module</option>
                                     @foreach($modules as $module)
-                                        <option value="{{ $module->topic_id }}" {{ $batch->module_master_id == $module->topic_id ? 'selected' : '' }}>{{ $module->topic }}</option>
+                                        <option value="{{ $module->id }}" {{ $batch->module_master_id == $module->id ? 'selected' : '' }}>{{ $module->summary_title }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -140,8 +140,15 @@
                             </div>
                             
                             <div class="col-md-3">
-                                <label for="venue" class="form-label">Venue ID</label>
-                                <input type="number" class="form-control" id="venue" name="venue" value="{{ $batch->venue ?? '' }}">
+                                <label for="venue" class="form-label">Venue *</label>
+                                <select class="form-select" id="venue" name="venue" required>
+                                    <option value="">Select Venue</option>
+                                    @if(isset($venues))
+                                        @foreach($venues as $venue)
+                                            <option value="{{ $venue->venue_id }}" {{ $batch->venue == $venue->venue_id ? 'selected' : '' }}>{{ $venue->venue_name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
                             </div>
                             
                             <div class="col-md-3">

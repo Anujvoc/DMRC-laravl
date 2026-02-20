@@ -118,9 +118,15 @@
         <div class="d-flex gap-2">
 
         
-     <a href="{{ route('admin.module.export.word') }}" class="btn btn-success">
-    <i class="bi bi-file-earmark-word"></i> Export QFF-64
-</a>
+     @if(isset($modules) && count($modules) > 0)
+        <a href="{{ route('admin.module.export.word', $modules->first()->id) }}" class="btn btn-success">
+            <i class="bi bi-file-earmark-word"></i> Export QFF-64
+        </a>
+     @else
+        <a href="javascript:void(0)" class="btn btn-success disabled" aria-disabled="true">
+            <i class="bi bi-file-earmark-word"></i> Export QFF-64
+        </a>
+     @endif
 
 
 
@@ -144,6 +150,7 @@
             <th>Module Title</th>
             <th>Subject</th>
             <th>Category</th>
+            <th>Certification</th>
             <th>Module Doc No</th>
             <th>Revision</th>
             <th>Date2</th>
@@ -161,11 +168,13 @@
                 {{ $module->summary_title }}
             </td>
 
-            <td>{{ $module->subject }}</td>
+            <td>{{ $module->subject_titles ?? $module->subject }}</td>
 
             <td>{{ $module->category_title ?? '-' }}</td>
 
-            <td>{{ $module->module_doc_no ?? '-' }}</td>
+            <td>{{ $module->certification_title ?? '-' }}</td>
+
+            <td>{{ $module->doc_no ?? '-' }}</td>
 
             <td>{{ $module->rev_no }}</td>
 
@@ -181,6 +190,12 @@
                    title="Edit">
                     <i class="fas fa-edit"></i>
                 </a>
+
+                 <a href="{{ route('admin.module.export.word', $module->id) }}"
+       class="btn btn-sm btn-success btn-icon"
+       title="Export QFF-64">
+        <i class="bi bi-file-earmark-word"></i>
+    </a>
 
                 <button class="btn btn-sm btn-danger btn-icon"
                         title="Delete"

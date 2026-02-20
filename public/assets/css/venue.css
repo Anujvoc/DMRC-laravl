@@ -1,0 +1,59 @@
+#venueContainer{
+    margin-left: 45vmin;
+
+  
+}
+#venueTable{
+    margin-top: 10vmin;
+    width: 1100px;
+
+   border: 2px solid;
+   border-color: rgb(28, 40, 76);
+    
+
+}
+#table-row{
+    background-color: rgba(0, 0, 255, 0.51);
+}
+.text-light{
+    color: aliceblue;
+}
+#venuesHeader{
+    margin-top: 10rem;
+    
+}
+
+#trainingBatch{
+margin-top: 150px;
+margin-left: 300px;
+
+height: 80vmin;
+width:1200PX;
+border: 2px solid ;
+
+}
+
+#trainingBatch h1{
+  padding-left: 10px;
+    background-color:#C8F0A7;
+}
+#trainingBatchMain{
+    margin-left: 50px;
+}
+#weeklyTrainingContainer{
+  margin-top: 150px;
+margin-left: 300px;
+margin-right: 20px;
+height: auto;
+width: 1100px ;
+border: 2px solid;  
+}
+#weeklyTraining h1{
+   padding-left: 10px;
+    background-color:#C8F0A7;  
+}
+/*#venueTables{
+    border:1rem;
+      border-radius:  solid red;
+  
+}*/

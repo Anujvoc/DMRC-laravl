@@ -17,6 +17,9 @@ use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\TimeTableController;
 use App\Http\Controllers\Admin\TrainingProgramController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\InstructorController;
+use App\Http\Controllers\Admin\SubjectController;
+use App\Http\Controllers\Admin\CertificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,6 +84,37 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('venues/add',[VenueController::class, 'addVenue'])->name('venues.add');
         Route::post('venues/update',[VenueController::class, 'updateVenue'])->name('venues.update');
         Route::delete('venues/{id}',[VenueController::class, 'destroy'])->name('venues.destroy');
+         Route::get('venues/toggle/{id}',[VenueController::class, 'venueToggle'])->name('venues.toggle');
+
+        // Instructors
+        Route::prefix('instructors')->name('instructors.')->group(function () {
+            Route::get('/', [InstructorController::class, 'index'])->name('index');
+            Route::get('/add', [InstructorController::class, 'create'])->name('create');
+            Route::get('/{id}/edit', [InstructorController::class, 'edit'])->name('edit');
+            Route::post('/', [InstructorController::class, 'store'])->name('store');
+            Route::put('/{id}', [InstructorController::class, 'update'])->name('update');
+            Route::delete('/{id}', [InstructorController::class, 'destroy'])->name('destroy');
+        });
+
+        // Subjects
+        Route::prefix('subjects')->name('subjects.')->group(function () {
+            Route::get('/', [SubjectController::class, 'index'])->name('index');
+            Route::get('/add', [SubjectController::class, 'create'])->name('create');
+            Route::get('/{id}/edit', [SubjectController::class, 'edit'])->name('edit');
+            Route::post('/', [SubjectController::class, 'store'])->name('store');
+            Route::put('/{id}', [SubjectController::class, 'update'])->name('update');
+            Route::delete('/{id}', [SubjectController::class, 'destroy'])->name('destroy');
+        });
+
+        // Certifications
+        Route::prefix('certifications')->name('certifications.')->group(function () {
+            Route::get('/', [CertificationController::class, 'index'])->name('index');
+            Route::get('/add', [CertificationController::class, 'create'])->name('create');
+            Route::get('/{id}/edit', [CertificationController::class, 'edit'])->name('edit');
+            Route::post('/', [CertificationController::class, 'store'])->name('store');
+            Route::put('/{id}', [CertificationController::class, 'update'])->name('update');
+            Route::delete('/{id}', [CertificationController::class, 'destroy'])->name('destroy');
+        });
 
         
 
@@ -132,7 +166,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/module-master/{module_id}', [ModuleController::class, 'update'])->name('master.update');
         Route::delete('/module-master/{module_id}', [ModuleController::class, 'destroy'])->name('master.destroy');
         Route::get('/module-master/api', [ModuleController::class, 'getModules'])->name('module.master.api');
-        Route::get('/export/word', [ModuleController::class,'exportWord'])->name('export.word');
+        Route::get( '/module-master/export-word/{id}', [ModuleController::class,'exportWord'])->name('export.word');
+  
+  
+
+
     
 
 
@@ -350,8 +388,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
                     
-                
-                return response()->json($subtopics);
+                            return response()->json($subtopics);
             } catch (\Exception $e) {
                 // Log error for debugging
                 \Log::error('Subtopics API Error: ' . $e->getMessage());
@@ -383,6 +420,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                Route::get('calender/batch',[TimeTableController::class, 'addNewBatch'])->name('calender.batch');
                Route::post('batch/store',[TimeTableController::class, 'storeBatch'])->name('batch.store');
                Route::get('weekly/training',[TimeTableController::class,'weeklyTraining'])->name('weekly.training');
+              
     });
 
 

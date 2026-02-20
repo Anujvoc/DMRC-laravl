@@ -50,7 +50,7 @@ class SubtopicController extends Controller
         $subtopic = DB::table('subtopics')->where('subtopic_id', $id)->first();
         
         if (!$subtopic) {
-            return redirect()->route('admin.master.subtopics')
+            return redirect()->route('admin.module.subtopics')
                 ->with('error', 'Subtopic not found');
         }
         
@@ -72,6 +72,7 @@ class SubtopicController extends Controller
             'topic_id' => 'required|integer|exists:topics,topic_id',
             'subtopic' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'sessions' => 'nullable|integer|min:0',
             'sort_order' => 'nullable|integer|min:0',
             'status' => 'required|boolean'
         ]);
@@ -84,13 +85,14 @@ class SubtopicController extends Controller
             'topic_id' => $validated['topic_id'],
             'subtopic' => $validated['subtopic'],
             'description' => $validated['description'],
+            'sessions' => $validated['sessions'] ?? 0,
             'sort_order' => $validated['sort_order'] ?? 0,
             'status' => $status,
             'created_at' => now(),
             'updated_at' => now()
         ]);
 
-        return redirect()->route('admin.master.subtopics')
+        return redirect()->route('admin.module.subtopics')
             ->with('success', 'Subtopic created successfully!');
     }
 
@@ -107,6 +109,7 @@ class SubtopicController extends Controller
             'topic_id' => 'required|integer|exists:topics,topic_id',
             'subtopic' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'sessions' => 'nullable|integer|min:0',
             'sort_order' => 'nullable|integer|min:0',
             'status' => 'required|boolean'
         ]);
@@ -119,12 +122,13 @@ class SubtopicController extends Controller
             'topic_id' => $validated['topic_id'],
             'subtopic' => $validated['subtopic'],
             'description' => $validated['description'],
+            'sessions' => $validated['sessions'] ?? 0,
             'sort_order' => $validated['sort_order'] ?? 0,
             'status' => $status,
             'updated_at' => now()
         ]);
 
-        return redirect()->route('admin.master.subtopics')
+        return redirect()->route('admin.module.subtopics')
             ->with('success', 'Subtopic updated successfully!');
     }
 
@@ -139,10 +143,10 @@ class SubtopicController extends Controller
         $deleted = DB::table('subtopics')->where('subtopic_id', $id)->delete();
         
         if ($deleted) {
-            return redirect()->route('admin.master.subtopics')
+            return redirect()->route('admin.module.subtopics')
                 ->with('success', 'Subtopic deleted successfully!');
         } else {
-            return redirect()->route('admin.master.subtopics')
+            return redirect()->route('admin.module.subtopics')
                 ->with('error', 'Subtopic not found or could not be deleted');
         }
     }

@@ -69,6 +69,11 @@
                             </div>
                             
                             <div class="col-md-6">
+                                <label for="sessions" class="form-label">Sessions</label>
+                                <input type="number" class="form-control" id="sessions" name="sessions" min="0" value="0">
+                            </div>
+                            
+                            <div class="col-md-6">
                                 <label for="status" class="form-label">Status</label>
                                 <select class="form-select" id="status" name="status">
                                     <option value="1">Active</option>

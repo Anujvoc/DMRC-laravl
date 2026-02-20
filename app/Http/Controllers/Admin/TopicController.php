@@ -16,7 +16,12 @@ class TopicController extends Controller
     public function index()
     {
         // Fetch topics from database
-        $topics = DB::table('topics')->orderBy('sort_order', 'asc')->orderBy('topic', 'asc')->get();
+        $topics = DB::table('topics')
+            ->leftJoin('subject', 'topics.subject_id', '=', 'subject.id')
+            ->select('topics.*', 'subject.title as subject_title')
+            ->orderBy('topics.sort_order', 'asc')
+            ->orderBy('topics.topic', 'asc')
+            ->get();
         
         return view('admin.pages.module_management.topics.index', compact('topics'));
     }
@@ -28,7 +33,11 @@ class TopicController extends Controller
      */
     public function create()
     {
-        return view('admin.pages.module_management.topics.create');
+        $subjects = DB::table('subject')
+            ->orderBy('title', 'asc')
+            ->get();
+
+        return view('admin.pages.module_management.topics.create', compact('subjects'));
     }
 
     /**
@@ -42,11 +51,15 @@ class TopicController extends Controller
         $topic = DB::table('topics')->where('topic_id', $id)->first();
         
         if (!$topic) {
-            return redirect()->route('admin.master.topics')
+            return redirect()->route('admin.module.topics')
                 ->with('error', 'Topic not found');
         }
+
+        $subjects = DB::table('subject')
+            ->orderBy('title', 'asc')
+            ->get();
         
-        return view('admin.pages.module_management.topics.edit', compact('topic'));
+        return view('admin.pages.module_management.topics.edit', compact('topic', 'subjects'));
     }
 
     /**
@@ -59,6 +72,7 @@ class TopicController extends Controller
     {
         $validated = $request->validate([
             'topic' => 'required|string|max:255',
+            'subject_id' => 'nullable|integer',
             'subtopic' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'sort_order' => 'nullable|integer|min:0',
@@ -71,6 +85,7 @@ class TopicController extends Controller
         // Insert into database
         $topicId = DB::table('topics')->insertGetId([
             'topic' => $validated['topic'],
+            'subject_id' => $validated['subject_id'] ?? null,
             'subtopic' => $validated['subtopic'],
             'description' => $validated['description'],
             'sort_order' => $validated['sort_order'] ?? 0,
@@ -79,7 +94,7 @@ class TopicController extends Controller
             'updated_at' => now()
         ]);
 
-        return redirect()->route('admin.master.topics')
+        return redirect()->route('admin.module.topics')
             ->with('success', 'Topic created successfully!');
     }
 
@@ -94,6 +109,7 @@ class TopicController extends Controller
     {
         $validated = $request->validate([
             'topic' => 'required|string|max:255',
+            'subject_id' => 'nullable|integer',
             'subtopic' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'sort_order' => 'nullable|integer|min:0',
@@ -106,6 +122,7 @@ class TopicController extends Controller
         // Update database
         DB::table('topics')->where('topic_id', $id)->update([
             'topic' => $validated['topic'],
+            'subject_id' => $validated['subject_id'] ?? null,
             'subtopic' => $validated['subtopic'],
             'description' => $validated['description'],
             'sort_order' => $validated['sort_order'] ?? 0,
@@ -113,7 +130,7 @@ class TopicController extends Controller
             'updated_at' => now()
         ]);
 
-        return redirect()->route('admin.master.topics')
+        return redirect()->route('admin.module.topics')
             ->with('success', 'Topic updated successfully!');
     }
 
@@ -128,10 +145,10 @@ class TopicController extends Controller
         $deleted = DB::table('topics')->where('topic_id', $id)->delete();
         
         if ($deleted) {
-            return redirect()->route('admin.master.topics')
+            return redirect()->route('admin.module.topics')
                 ->with('success', 'Topic deleted successfully!');
         } else {
-            return redirect()->route('admin.master.topics')
+            return redirect()->route('admin.module.topics')
                 ->with('error', 'Topic not found or could not be deleted');
         }
     }

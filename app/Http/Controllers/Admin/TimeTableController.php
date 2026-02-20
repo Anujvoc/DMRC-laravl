@@ -9,13 +9,121 @@ use Illuminate\Http\Request;
 
 class TimeTableController extends Controller
 {
-    public function index()
+    /*public function index()
     {
         return view('admin.pages.timetable_management.index');
-    }
+    }*/
 
-    function addNewBatch(){
-        return view('admin.pages.calender.add_batch');
+    public function addNewBatch()
+{
+    $weekOffset = 0;
+    $workingDays = [];
+    $timeSlots = [];
+
+    return view('admin.pages.timetable_management.index', compact(
+        'weekOffset',
+        'workingDays',
+        'timeSlots'
+    ));
+}
+   public function weeklyTraining(Request $request)
+    {
+        $startDate = $request->start_date ?? Carbon::now()->format('Y-m-d');
+        $weekOffset = (int) ($request->week ?? 0);
+        $sessions = (int) ($request->time ?? 8);
+
+        $start = Carbon::parse($startDate)
+            ->addWeeks($weekOffset)
+            ->startOfWeek(Carbon::MONDAY);
+
+        $end = $start->copy()->endOfWeek(Carbon::SATURDAY);
+
+        $workingDays = [];
+
+        while ($start <= $end) {
+
+            $dayName = $start->format('l');
+
+            // Sunday Skip
+            if ($dayName != 'Sunday') {
+
+                // 2,4,5 Saturday Skip
+                if ($dayName == 'Saturday') {
+                    $weekNumber = ceil($start->day / 7);
+                    if (in_array($weekNumber, [2,4,5])) {
+                        $start->addDay();
+                        continue;
+                    }
+                }
+
+                $workingDays[] = [
+                    'day'  => $dayName,
+                    'date' => $start->format('d-m-Y')
+                ];
+            }
+
+            $start->addDay();
+        }
+
+        $timeSlots = $this->generateSlots('09:30', $sessions);
+
+        return view('admin.pages.timetable_management.index', compact(
+            'workingDays',
+            'timeSlots',
+            'weekOffset'
+        ));
+    }
+        private function generateSlots($startTime, $totalSessions)
+    {
+        $sessionDuration = 60;
+        $teaAfter = 2;
+        $teaDuration = 15;
+        $lunchAfter = 4;
+        $lunchDuration = 60;
+
+        $slots = [];
+        $currentTime = Carbon::createFromFormat('H:i', $startTime);
+
+        for ($i = 1; $i <= $totalSessions; $i++) {
+
+            $endTime = $currentTime->copy()->addMinutes($sessionDuration);
+
+            $slots[] = [
+                'type' => 'session',
+                'label' => 'Session ' . $i,
+                'time' => $currentTime->format('H:i') . ' - ' . $endTime->format('H:i')
+            ];
+
+            $currentTime = $endTime;
+
+            // Tea Break
+            if ($i == $teaAfter) {
+                $teaEnd = $currentTime->copy()->addMinutes($teaDuration);
+
+                $slots[] = [
+                    'type' => 'tea',
+                    'label' => 'Tea Break',
+                    'time' => $currentTime->format('H:i') . ' - ' . $teaEnd->format('H:i')
+                ];
+
+                $currentTime = $teaEnd;
+            }
+
+            // Lunch Break
+            if ($i == $lunchAfter) {
+                $lunchEnd = $currentTime->copy()->addMinutes($lunchDuration);
+
+                $slots[] = [
+                    'type' => 'lunch',
+                    'label' => 'Lunch Break',
+                    'time' => $currentTime->format('H:i') . ' - ' . $lunchEnd->format('H:i')
+                ];
+
+                $currentTime = $lunchEnd;
+            }
+        }
+
+        return $slots;
     }
 
     public function storeBatch(Request $request)
@@ -211,104 +319,5 @@ $timeSlots6 = [
             return view('admin.pages.calender.weekly_training',compact('workingDays','startDate','endDate','weekOffset', 'timeSlots8','timeSlots6'));
         }*/
 
-             public function weeklyTraining(Request $request)
-    {
-        $startDate = $request->start_date ?? Carbon::now()->format('Y-m-d');
-        $weekOffset = (int) ($request->week ?? 0);
-        $sessions = (int) ($request->time ?? 8);
-
-        $start = Carbon::parse($startDate)
-            ->addWeeks($weekOffset)
-            ->startOfWeek(Carbon::MONDAY);
-
-        $end = $start->copy()->endOfWeek(Carbon::SATURDAY);
-
-        $workingDays = [];
-
-        while ($start <= $end) {
-
-            $dayName = $start->format('l');
-
-            // Sunday Skip
-            if ($dayName != 'Sunday') {
-
-                // 2,4,5 Saturday Skip
-                if ($dayName == 'Saturday') {
-                    $weekNumber = ceil($start->day / 7);
-                    if (in_array($weekNumber, [2,4,5])) {
-                        $start->addDay();
-                        continue;
-                    }
-                }
-
-                $workingDays[] = [
-                    'day'  => $dayName,
-                    'date' => $start->format('d-m-Y')
-                ];
-            }
-
-            $start->addDay();
-        }
-
-        $timeSlots = $this->generateSlots('09:30', $sessions);
-
-        return view('admin.pages.calender.weekly_training', compact(
-            'workingDays',
-            'timeSlots',
-            'weekOffset'
-        ));
-    }
-        private function generateSlots($startTime, $totalSessions)
-    {
-        $sessionDuration = 60;
-        $teaAfter = 2;
-        $teaDuration = 15;
-        $lunchAfter = 4;
-        $lunchDuration = 60;
-
-        $slots = [];
-        $currentTime = Carbon::createFromFormat('H:i', $startTime);
-
-        for ($i = 1; $i <= $totalSessions; $i++) {
-
-            $endTime = $currentTime->copy()->addMinutes($sessionDuration);
-
-            $slots[] = [
-                'type' => 'session',
-                'label' => 'Session ' . $i,
-                'time' => $currentTime->format('H:i') . ' - ' . $endTime->format('H:i')
-            ];
-
-            $currentTime = $endTime;
-
-            // Tea Break
-            if ($i == $teaAfter) {
-                $teaEnd = $currentTime->copy()->addMinutes($teaDuration);
-
-                $slots[] = [
-                    'type' => 'tea',
-                    'label' => 'Tea Break',
-                    'time' => $currentTime->format('H:i') . ' - ' . $teaEnd->format('H:i')
-                ];
-
-                $currentTime = $teaEnd;
-            }
-
-            // Lunch Break
-            if ($i == $lunchAfter) {
-                $lunchEnd = $currentTime->copy()->addMinutes($lunchDuration);
-
-                $slots[] = [
-                    'type' => 'lunch',
-                    'label' => 'Lunch Break',
-                    'time' => $currentTime->format('H:i') . ' - ' . $lunchEnd->format('H:i')
-                ];
-
-                $currentTime = $lunchEnd;
-            }
-        }
-
-        return $slots;
-    }
-
+          
 }

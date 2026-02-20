@@ -4,8 +4,12 @@
 
 @section('content')
 <div class="container" id="weeklyTrainingContainer">
-
-    <form method="GET" class="mb-3">
+@php
+    $weekOffset = $weekOffset ?? 0;
+    $workingDays = $workingDays ?? [];
+    $timeSlots = $timeSlots ?? [];
+@endphp
+    <form method="GET"  action="{{ route('admin.timetable-management.weekly.training')}}" class="mb-3">
         <div class="row">
             <div class="col-md-4">
                 <label>Start Date</label>
@@ -41,12 +45,12 @@
     </form>
 
 
-    <div class="mb-3">
+    <div class="mb-3 d-flex justify-content-center gap-2">
         <a href="?start_date={{request('start_date')}}&end_date={{request('end_date')}}&week={{$weekOffset-1}}"
            class="btn btn-sm btn-secondary">Prev Week</a>
 
         <a href="?start_date={{request('start_date')}}&end_date={{request('end_date')}}&week={{$weekOffset+1}}"
-           class="btn btn-sm btn-success">Next Week</a>
+           class="btn btn-sm btn-success w-auto">Next Week</a>
     </div>
 
      <table class="table table-bordered text-center">

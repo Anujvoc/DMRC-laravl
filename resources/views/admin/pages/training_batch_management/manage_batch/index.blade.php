@@ -248,10 +248,19 @@
                 <i class="fas fa-th"></i> Modules
             </a>
 
-            <button class="btn btn-sm btn-delete"
-                onclick="deleteTrainingBatch({{ $batch->batch_id }})">
-                <i class="fas fa-trash"></i> Delete
-            </button>
+          <form action="{{ route('admin.training_batch.destroy', $batch->batch_id) }}" 
+      method="POST" 
+      style="display:inline-block;"
+      onsubmit="return confirm('Are you sure you want to delete this batch?')">
+
+    @csrf
+    @method('DELETE')
+
+    <button type="submit" class="btn btn-sm btn-delete">
+        <i class="fas fa-trash"></i> Delete
+    </button>
+</form>
+
         </div>
     </td>
 </tr>
@@ -428,28 +437,25 @@ function editTrainingBatch(batchId) {
 // Delete training batch function
 function deleteTrainingBatch(batchId) {
     if (confirm('Are you sure you want to delete this training batch? This action cannot be undone.')) {
-        // Create form for DELETE method
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ route("admin.training_batch.destroy", ":id") }}'.replace(':id', batchId);
-        
-        // Add CSRF token
-        const csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = '_token';
-        csrfToken.value = '{{ csrf_token() }}';
-        form.appendChild(csrfToken);
-        
-        // Add DELETE method override
-        const methodField = document.createElement('input');
-        methodField.type = 'hidden';
-        methodField.name = '_method';
-        methodField.value = 'DELETE';
-        form.appendChild(methodField);
-        
-        // Submit form
-        document.body.appendChild(form);
-        form.submit();
+        // Use fetch API for better error handling
+        fetch(`/admin/training-batch/${batchId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '/admin/training-batch';
+            } else {
+                alert('Error deleting training batch. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Delete error:', error);
+            alert('Error deleting training batch. Please try again.');
+        });
     }
 }
 

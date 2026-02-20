@@ -38,6 +38,7 @@
                                 <th>Subtopic</th>
                                 <th>Topic</th>
                                 <th>Description</th>
+                                <th>Sessions</th>
                                 <th>Sort Order</th>
                                 <th>Status</th>
                                 <th class="text-end">Actions</th>
@@ -56,6 +57,7 @@
                                     </td>
                                     <td>{{ $subtopic->topic_name ?? 'N/A' }}</td>
                                     <td>{{ $subtopic->description ?? 'N/A' }}</td>
+                                    <td>{{ $subtopic->sessions ?? 'N/A' }}</td>
                                     <td>{{ $subtopic->sort_order ?? 'N/A' }}</td>
                                     <td>
                                         @if(($subtopic->status ?? 1) == 1)
@@ -77,7 +79,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-4">
+                                    <td colspan="7" class="text-center py-4">
                                         <div class="text-muted">
                                             <i class="fi fi-sr-book fa-3x mb-3"></i>
                                             <h5>No subtopics found</h5>

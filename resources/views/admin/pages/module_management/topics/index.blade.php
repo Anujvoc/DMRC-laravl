@@ -39,6 +39,7 @@
                             <tr>
                                
                                 <th>Topic</th>
+                                <th>Subject</th>
                                 <th>Subtopic</th>
                                 <th>Description</th>
                                 <th>Sort Order</th>
@@ -59,6 +60,7 @@
                                             </div>
                                         </div>
                                     </td>
+                                    <td>{{ $topic->subject_title ?? 'N/A' }}</td>
                                     <td>{{ $topic->subtopic ?? 'N/A' }}</td>
                                     <td>{{ $topic->description ?? 'N/A' }}</td>
                                     <td>{{ $topic->sort_order ?? 'N/A' }}</td>
@@ -80,7 +82,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                            @empty
+                            @empty7
                                 <tr>
                                     <td colspan="6" class="text-center py-4">
                                         <div class="text-muted">
